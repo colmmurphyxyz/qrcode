@@ -12,11 +12,13 @@ package jp.sourceforge.qrcode.exception;
 //- UnsupportedVersionException
 
 public class DecodingFailedException extends IllegalArgumentException {
-	String message = null;
-	public DecodingFailedException(String message) {
-		this.message = message;
-	}
-	public String getMessage() {
-		return message;
-	}
+    String message = null;
+
+    public DecodingFailedException(String message) {
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }
