@@ -47,23 +47,26 @@ public class QRCodeDecoderCUIExample {
     static boolean processDecode(String filename, QRCodeDecoder decoder) {
         DebugCanvas canvas = new J2SECanvas();
         decoder.setCanvas(canvas);
-        BufferedImage image = null;
+        BufferedImage image;
         try {
-            if (filename.startsWith("http://"))
+            if (filename.startsWith("http://") || filename.startsWith("https://")) {
                 image = ImageIO.read(new URL(filename));
-            else
+            } else {
                 image = ImageIO.read(new File(filename));
+            }
             String decodedString = new String(decoder.decode(new J2SEImage(image)));
             decodedString = ContentConverter.convert(decodedString);
             System.out.println(decodedString);
         } catch (IOException e) {
             canvas.println("Error: " + e.getMessage() + " " + filename);
+            System.out.println("Error: " + e.getMessage() + " " + filename);
             return false;
         } catch (DecodingFailedException dfe) {
             canvas.println("Error: " + dfe.getMessage());
+            System.out.println("Error: " + dfe.getMessage());
             return false;
         } catch (Exception e) {
-            canvas.println("Error: " + e.getMessage());
+            System.out.println("Error: " + e.getMessage());
             return false;
         }
         return true;
