@@ -46,7 +46,7 @@ public class QRCodeDecoderCUIExample {
 
     static boolean processDecode(String filename, QRCodeDecoder decoder) {
         DebugCanvas canvas = new J2SECanvas();
-        decoder.setCanvas(canvas);
+        QRCodeDecoder.setCanvas(canvas);
         BufferedImage image;
         try {
             if (filename.startsWith("http://") || filename.startsWith("https://")) {
@@ -66,6 +66,7 @@ public class QRCodeDecoderCUIExample {
             System.out.println("Error: " + dfe.getMessage());
             return false;
         } catch (Exception e) {
+            canvas.println("Error: " + e.getMessage());
             System.out.println("Error: " + e.getMessage());
             return false;
         }
