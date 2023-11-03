@@ -1,1 +1,7 @@
+# IDE filed/directories
 .idea/
+qrcode.iml
+
+# build output
+out/
+target/
