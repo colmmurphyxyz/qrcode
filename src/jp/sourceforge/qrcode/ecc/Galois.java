@@ -6,7 +6,7 @@ import java.util.Arrays;
  * タイトル: GF(2^8)
  *
  * @author Masayuki Miyazaki
- * http://sourceforge.jp/projects/reedsolomon/
+ * <a href="http://sourceforge.jp/projects/reedsolomon/">ReedSolomon source</a>
  */
 public final class Galois {
     public static final int POLYNOMIAL = 0x1d;  // = 0b00011101
@@ -151,16 +151,16 @@ public final class Galois {
     }
 
     /**
-     * シンドロームの計算
+     * Syndrome calculation
      *
      * @param data   int[]
-     *               入力データ配列
+     *               Input data array
      * @param length int
-     *               データ長
+     *               Input data length
      * @param syn    int[]
      *               (x - α^0) (x - α^1) (x - α^2) ...のシンドローム
      * @return boolean
-     * true: シンドロームは総て0
+     * true: All syndromes are 0
      */
     public boolean calcSyndrome(int[] data, int length, int[] syn) {
         int hasErr = 0;
