@@ -100,16 +100,8 @@ public class BCH15_5 {
         }
         k = searchElement(p);
         s[0] = (k >= 15) ? -1 : k;
-		/*System.out.println("SyndromeS1 = " + ((s[0] == -1) ?
-				"0" : 
-				"α^" + String.valueOf(s[0]))
-		);*/
 
         s[1] = (s[0] < 0) ? -1 : (s[0] * 2) % 15;
-		/*System.out.println("SyndromeS2 = " + ((s[1] == -1) ?
-				"0" : 
-				"α^" + String.valueOf(s[1]))
-		);*/
 
         p = new int[4];
         for (k = 0; k < 15; k++) {
@@ -120,16 +112,8 @@ public class BCH15_5 {
         k = searchElement(p);
 
         s[2] = (k >= 15) ? -1 : k;
-		/*System.out.println("SyndromeS3 = " + ((s[2] == -1) ?
-				"0" : 
-				"α^" + String.valueOf(s[2]))
-		);*/
 
         s[3] = (s[1] < 0) ? -1 : (s[1] * 2) % 15;
-		/*System.out.println("SyndromeS4 = " + ((s[3] == -1) ?
-				"0" : 
-				"α^" + String.valueOf(s[3]))
-		);*/
 
         p = new int[4];
         for (k = 0; k < 15; k++) {
@@ -138,10 +122,6 @@ public class BCH15_5 {
         }
         k = searchElement(p);
         s[4] = (k >= 15) ? -1 : k;
-		/*System.out.println("SyndromeS5 = " + ((s[4] == -1) ?
-				"0" : 
-				"α^" + String.valueOf(s[4]))
-		);*/
 
         return s;
     }
@@ -183,19 +163,10 @@ public class BCH15_5 {
             //System.out.println("No errors.");
             return errorPos;
         } else if (e[1] == -1) {
-			/*System.out.println("1 error. position is "+ 
-					String.valueOf(e[0]) +
-					" (" + bitName[e[0]] + ")")*/
-            ;
             errorPos[0] = 1;
             errorPos[1] = e[0];
             return errorPos;
         }
-        //else {
-        //System.out.println("2 or more errors.");
-        //}
-        //int numError = 0;
-        //int[] p;
         int x3, x2, x1;
         int t, t1, t2, anError;
         //error detection
@@ -216,9 +187,6 @@ public class BCH15_5 {
             anError = addGF(t1, t2);
 
             if (anError >= 15) {
-				/*System.out.println("Error found. position is " + 
-						String.valueOf(i) +
-						"(" + bitName[i]+ ")");*/
                 errorPos[0]++;
                 errorPos[errorPos[0]] = i;
             }

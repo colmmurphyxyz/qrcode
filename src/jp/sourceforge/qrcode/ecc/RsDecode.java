@@ -1,7 +1,5 @@
 package jp.sourceforge.qrcode.ecc;
 
-import jp.sourceforge.qrcode.ecc.Galois;
-
 /**
  * ReedSolomon code Decoder
  *
