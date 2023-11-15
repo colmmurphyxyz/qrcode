@@ -9,10 +9,10 @@ import java.util.Arrays;
  * http://sourceforge.jp/projects/reedsolomon/
  */
 public final class Galois {
-    public static final int POLYNOMIAL = 0x1d;
+    public static final int POLYNOMIAL = 0x1d;  // = 0b00011101
     private static final Galois instance = new Galois();
-    private int[] expTbl = new int[255 * 2];    // 二重にもつことによりmul, div等を簡略化
-    private int[] logTbl = new int[255 + 1];
+    private final int[] expTbl = new int[255 * 2];    // 二重にもつことによりmul, div等を簡略化
+    private final int[] logTbl = new int[255 + 1];
 
     private Galois() {
         initGaloisTable();
@@ -38,8 +38,7 @@ public final class Galois {
     }
 
     /**
-     * スカラー -> ベクター変換
-     *
+     * Scalar to vector conversion
      * @param a int
      * @return int
      */
@@ -48,7 +47,7 @@ public final class Galois {
     }
 
     /**
-     * ベクター -> スカラー変換
+     * vector to scalar conversion
      *
      * @param a int
      * @return int
@@ -58,7 +57,7 @@ public final class Galois {
     }
 
     /**
-     * 誤り位置インデックスの計算
+     * Calculate error position index
      *
      * @param length int
      *               データ長
@@ -72,12 +71,11 @@ public final class Galois {
     }
 
     /**
-     * 掛け算
+     * quickly Multiply a and b using a lookup table
      *
      * @param a int
      * @param b int
-     * @return int
-     * = a * b
+     * @return a * b
      */
     public int mul(int a, int b) {
         return (a == 0 || b == 0) ? 0 : expTbl[logTbl[a] + logTbl[b]];
@@ -96,12 +94,11 @@ public final class Galois {
     }
 
     /**
-     * 割り算
+     * fast division a / b via lookup table
      *
      * @param a int
      * @param b int
-     * @return int
-     * = a / b
+     * @return a / b
      */
     public int div(int a, int b) {
         return (a == 0) ? 0 : expTbl[logTbl[a] - logTbl[b] + 255];
@@ -112,7 +109,7 @@ public final class Galois {
      *
      * @param a int
      * @param b int
-     * @return int
+     * @return a / a^b
      * = a / α^b
      */
     public int divExp(int a, int b) {
@@ -131,12 +128,12 @@ public final class Galois {
     }
 
     /**
-     * 数式の掛け算
+     * multiply two polynomials a and b, store the result in seki
      *
-     * @param seki int[]
+     * @param seki int[] output polynomial = a * b
      *             seki = a * b
-     * @param a    int[]
-     * @param b    int[]
+     * @param a    int[] polynomial
+     * @param b    int[] polynomial
      */
     public void mulPoly(int[] seki, int[] a, int[] b) {
         Arrays.fill(seki, 0);

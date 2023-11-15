@@ -1,15 +1,12 @@
 package jp.sourceforge.reedsolomon;
 
 /**
- * タイトル: BCH(15, 5)符号のエンコード/デコード
- *
- * @author Masayuki Miyazaki
- * http://sourceforge.jp/projects/reedsolomon/
+ * <a href="http://sourceforge.jp/projects/reedsolomon/">link to reedsolomon</a>
  */
 public final class BCH_15_5 {
     private static final int GX = 0x137;
     private static final BCH_15_5 instance = new BCH_15_5();
-    private int[] trueCodes = new int[32];
+    private final int[] trueCodes = new int[32];
 
     private BCH_15_5() {
         makeTrueCodes();
@@ -46,22 +43,25 @@ public final class BCH_15_5 {
     }
 
     /**
-     * ハミング距離の計算
-     *
+     * calculate the <a hreh="https://www.omnicalculator.com/other/hamming-distance#what-is-the-hamming-distance">Hamming Distance</a> between two 32-bit integers
+     * the Hamming distance in this case being the number of bits that differ between the two inputs
+     * e.g calcHammingDistance(0b11010, 0b11111) = 2
      * @param c1 int
      * @param c2 int
-     * @return int
+     * @return The Hamming Distance between the two binary sequences
      */
-    private static int calcDistance(int c1, int c2) {
-        int n = 0;
-        int wk = c1 ^ c2;
-        while (wk != 0) {
-            if ((wk & 1) != 0) {
-                n++;
+    private static int calcHammingDistance(int c1, int c2) {
+        int hammingDistance = 0;
+        // c1 XOR c2 outputs a sequence where a given digit is 1 if the two inputs have different values
+        // at that index
+        int bitDiffs = c1 ^ c2;
+        while (bitDiffs != 0) {
+            if ((bitDiffs & 1) != 0) {
+                hammingDistance++;
             }
-            wk >>= 1;
+            bitDiffs >>= 1;
         }
-        return n;
+        return hammingDistance;
     }
 
     /**
@@ -85,7 +85,7 @@ public final class BCH_15_5 {
          */
         for (int i = 0; i < trueCodes.length; i++) {
             int code = trueCodes[i];
-            if (calcDistance(data, code) <= 3) {
+            if (calcHammingDistance(data, code) <= 3) {
                 return code;
             }
         }

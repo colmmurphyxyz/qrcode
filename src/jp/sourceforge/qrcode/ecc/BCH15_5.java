@@ -15,8 +15,7 @@ public class BCH15_5 {
         int[] s = calcSyndrome(receiveData);
 
         int[] errorPos = detectErrorBitPosition(s);
-        boolean[] output = correctErrorBit(receiveData, errorPos);
-        return output;
+        return correctErrorBit(receiveData, errorPos);
     }
 
     int[][] createGF16() {
@@ -24,12 +23,9 @@ public class BCH15_5 {
         int[] seed = {1, 1, 0, 0};
         for (int i = 0; i < 4; i++)
             gf16[i][i] = 1;
-        for (int i = 0; i < 4; i++)
-            gf16[4][i] = seed[i];
+        System.arraycopy(seed, 0, gf16[4], 0, 4);
         for (int i = 5; i < 16; i++) {
-            for (int j = 1; j < 4; j++) {
-                gf16[i][j] = gf16[i - 1][j - 1];
-            }
+            System.arraycopy(gf16[i - 1], 0, gf16[i], 1, 3);
             if (gf16[i - 1][3] == 1) {
                 for (int j = 0; j < 4; j++)
                     gf16[i][j] = (gf16[i][j] + seed[j]) % 2;
@@ -49,23 +45,6 @@ public class BCH15_5 {
         }
         return k;
     }
-	
-  /*String getInputString() {
-		String inputString = null;
-		InputStreamReader isr = new InputStreamReader(System.in);
-		BufferedReader br = new BufferedReader(isr);
-		try {
-			inputString = br.readLine();
-		} catch (IOException e){}
-		return inputString;
-  }*/
-  
-	/*public int getInput() {
-		System.out.print("Input Number 0-127: ");
-		String str = getInputString();
-		int input = Integer.parseInt(str);
-		return input;
-	}*/
 
     int[] getCode(int input) {
         int[] f = new int[15];
@@ -100,20 +79,6 @@ public class BCH15_5 {
     static String[] bitName = {"c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9",
             "d0", "d1", "d2", "d3", "d4",};
 
-//  static void printBit(String title, boolean[] bit) {
-//		System.out.print(title+": ");
-//		for (int i = 0; i < 15; i++) {
-//			if (i == 5) System.out.print(" ");
-//			System.out.print((bit[14 - i] == true) ? "1" : "0" );				
-//		}
-//		System.out.print("  (");
-//		for (int i = 0; i < 15; i++) {
-//			if (i == 5) System.out.print(" ");
-//			System.out.print(bitName[14 - i]);				
-//		}
-//		System.out.println(")");
-//	}
-
     int addGF(int arg1, int arg2) {
         int[] p = new int[4];
         for (int m = 0; m < 4; m++) {
@@ -124,29 +89,13 @@ public class BCH15_5 {
         return searchElement(p);
     }
 
-	/*void addRandomError(boolean[] f) {
-		Random random = new Random();
-		random.setSeed(System.currentTimeMillis());
-		
-		int r;
-		int numError = 3; //[TODO]change number of error and check
-		
-		for (int i = 0; i < numError; i++) {
-			r = random.nextInt();
-			if (r < 0) r = -r;
-			if (r / (double)Integer.MAX_VALUE < 0.9) {
-				int errorPos = r % 15;
-				f[errorPos] = !f[errorPos];
-			}	
-		}
-	}*/
 
     int[] calcSyndrome(boolean[] y) {
         int[] s = new int[5];
         int[] p = new int[4];
         int k;
         for (k = 0; k < 15; k++) {
-            if (y[k] == true) for (int m = 0; m < 4; m++)
+            if (y[k]) for (int m = 0; m < 4; m++)
                 p[m] = (p[m] + gf16[k][m]) % 2;
         }
         k = searchElement(p);
@@ -164,7 +113,7 @@ public class BCH15_5 {
 
         p = new int[4];
         for (k = 0; k < 15; k++) {
-            if (y[k] == true) for (int m = 0; m < 4; m++)
+            if (y[k]) for (int m = 0; m < 4; m++)
                 p[m] = (p[m] + gf16[(k * 3) % 15][m]) % 2;
         }
 
@@ -184,7 +133,7 @@ public class BCH15_5 {
 
         p = new int[4];
         for (k = 0; k < 15; k++) {
-            if (y[k] == true) for (int m = 0; m < 4; m++)
+            if (y[k]) for (int m = 0; m < 4; m++)
                 p[m] = (p[m] + gf16[(k * 5) % 15][m]) % 2;
         }
         k = searchElement(p);
@@ -291,22 +240,6 @@ public class BCH15_5 {
     public int getNumCorrectedError() {
         return numCorrectedError;
     }
-	
-  /*boolean[] parseBooleanArray(String source)
-  {
-      int i = Integer.parseInt(source, 2);
-      boolean b[] = new boolean[source.length()];
-      for(int j = 0; j < 15; j++)
-      {
-          int t = i >> j & 1;
-          if(t == 1)
-              b[j] = true;
-          else
-              b[j] = false;
-      }
-
-      return b;
-  }*/
 }
 
 
