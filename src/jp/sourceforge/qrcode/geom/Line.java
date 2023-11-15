@@ -87,17 +87,15 @@ public class Line {
 
     public static boolean isCross(Line line1, Line line2) {
         if (line1.isHorizontal() && line2.isVertical()) {
-            if (line1.getP1().getY() > line2.getP1().getY() &&
+            return line1.getP1().getY() > line2.getP1().getY() &&
                     line1.getP1().getY() < line2.getP2().getY() &&
                     line2.getP1().getX() > line1.getP1().getX() &&
-                    line2.getP1().getX() < line1.getP2().getX())
-                return true;
+                    line2.getP1().getX() < line1.getP2().getX();
         } else if (line1.isVertical() && line2.isHorizontal()) {
-            if (line1.getP1().getX() > line2.getP1().getX() &&
+            return line1.getP1().getX() > line2.getP1().getX() &&
                     line1.getP1().getX() < line2.getP2().getX() &&
                     line2.getP1().getY() > line1.getP1().getY() &&
-                    line2.getP1().getY() < line1.getP2().getY())
-                return true;
+                    line2.getP1().getY() < line1.getP2().getY();
         }
 
         return false;
@@ -112,15 +110,14 @@ public class Line {
     public int getLength() {
         int x = Math.abs(x2 - x1);
         int y = Math.abs(y2 - y1);
-        int r = QRCodeUtility.sqrt(x * x + y * y);
-        return r;
+        return QRCodeUtility.sqrt(x * x + y * y);
     }
 
     public static Line getLongest(Line[] lines) {
         Line longestLine = new Line();
-        for (int i = 0; i < lines.length; i++) {
-            if (lines[i].getLength() > longestLine.getLength()) {
-                longestLine = lines[i];
+        for (Line line : lines) {
+            if (line.getLength() > longestLine.getLength()) {
+                longestLine = line;
             }
         }
         return longestLine;

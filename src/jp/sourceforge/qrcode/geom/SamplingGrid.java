@@ -8,7 +8,7 @@ public class SamplingGrid {
     /**
      * A grid for a single area
      */
-    private class AreaGrid {
+    private static class AreaGrid {
         protected Line[] xLine;
         protected Line[] yLine;
 
@@ -50,9 +50,8 @@ public class SamplingGrid {
         }
     }
 
-    ;
 
-    private AreaGrid[][] grid;
+    private final AreaGrid[][] grid;
 
     public SamplingGrid(int sqrtNumArea) {
         grid = new AreaGrid[sqrtNumArea][sqrtNumArea];
@@ -142,11 +141,11 @@ public class SamplingGrid {
     public void adjust(Point adjust) {
         int dx = adjust.getX(), dy = adjust.getY();
         for (int ay = 0; ay < grid[0].length; ay++) {
-            for (int ax = 0; ax < grid.length; ax++) {
-                for (int i = 0; i < grid[ax][ay].xLine.length; i++)
-                    grid[ax][ay].xLine[i].translate(dx, dy);
-                for (int j = 0; j < grid[ax][ay].yLine.length; j++)
-                    grid[ax][ay].yLine[j].translate(dx, dy);
+            for (AreaGrid[] areaGrids : grid) {
+                for (int i = 0; i < areaGrids[ay].xLine.length; i++)
+                    areaGrids[ay].xLine[i].translate(dx, dy);
+                for (int j = 0; j < areaGrids[ay].yLine.length; j++)
+                    areaGrids[ay].yLine[j].translate(dx, dy);
             }
         }
     }
