@@ -1,4 +1,4 @@
-package jp.sourceforge.reedsolomon;
+package jp.sourceforge.qrcode.ecc;
 
 import java.util.Arrays;
 

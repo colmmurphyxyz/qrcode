@@ -16,7 +16,7 @@ import jp.sourceforge.qrcode.util.DebugCanvas;
 import jp.sourceforge.qrcode.util.DebugCanvasAdapter;
 import jp.sourceforge.qrcode.reader.QRCodeDataBlockReader;
 import jp.sourceforge.qrcode.reader.QRCodeImageReader;
-import jp.sourceforge.reedsolomon.RsDecode;
+import jp.sourceforge.qrcode.ecc.RsDecode;
 
 public class QRCodeDecoder {
     int numTryDecode;
