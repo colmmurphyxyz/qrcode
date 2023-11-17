@@ -21,8 +21,8 @@ import jp.sourceforge.qrcode.ecc.RsDecode;
 public class QRCodeDecoder {
     int numTryDecode;
     QRCodeSymbol qrCodeSymbol;
-    Vector results;
-    Vector lastResults = new Vector();
+    Vector<DecodeResult> results;
+//    Vector<DecodeResult> lastResults = new Vector<>();
     static DebugCanvas canvas;
     QRCodeImageReader imageReader;
     int numLastCorrectionFailures;
@@ -40,7 +40,7 @@ public class QRCodeDecoder {
             return decodedBytes;
         }
 
-        public int getNumCorrectuionFailures() {
+        public int getNumCorrectionFailures() {
             return numCorrectionFailures;
         }
 
@@ -59,13 +59,13 @@ public class QRCodeDecoder {
 
     public QRCodeDecoder() {
         numTryDecode = 0;
-        results = new Vector();
+        results = new Vector<>();
         QRCodeDecoder.canvas = new DebugCanvasAdapter();
     }
 
     public byte[] decode(QRCodeImage qrCodeImage) throws DecodingFailedException {
         Point[] adjusts = getAdjustPoints();
-        Vector results = new Vector();
+        Vector<DecodeResult> results = new Vector<>();
         numTryDecode = 0;
         while (numTryDecode < adjusts.length) {
             try {
@@ -78,7 +78,7 @@ public class QRCodeDecoder {
                     canvas.println("all errors. Retrying..");
                 }
             } catch (DecodingFailedException dfe) {
-                if (dfe.getMessage().indexOf("Finder Pattern") >= 0)
+                if (dfe.getMessage().contains("Finder Pattern"))
                     throw dfe;
             } finally {
                 numTryDecode += 1;
@@ -91,9 +91,9 @@ public class QRCodeDecoder {
         int minErrorIndex = -1;
         int minError = Integer.MAX_VALUE;
         for (int i = 0; i < results.size(); i++) {
-            DecodeResult result = (DecodeResult) results.elementAt(i);
-            if (result.getNumCorrectuionFailures() < minError) {
-                minError = result.getNumCorrectuionFailures();
+            DecodeResult result = results.elementAt(i);
+            if (result.getNumCorrectionFailures() < minError) {
+                minError = result.getNumCorrectionFailures();
                 minErrorIndex = i;
             }
         }
@@ -101,16 +101,14 @@ public class QRCodeDecoder {
         canvas.println("Reporting #" + (minErrorIndex) + " that,");
         canvas.println("corrected minimum errors (" + minError + ")");
         canvas.println("Decoding finished.");
-        return ((DecodeResult) results.elementAt(minErrorIndex)).getDecodedBytes();
+        return (results.elementAt(minErrorIndex)).getDecodedBytes();
     }
 
     Point[] getAdjustPoints() {
         // note that adjusts affect dependently
         // i.e. below means (0,0), (2,3), (3,4), (1,2), (2,1), (1,1), (-1,-1)
 
-//		Point[] adjusts = {new Point(0,0), new Point(2,3), new Point(1,1), 
-//				new Point(-2,-2), new Point(1,-1), new Point(-1,0), new Point(-2,-2)};
-        Vector adjustPoints = new Vector();
+        Vector<Point> adjustPoints = new Vector<>();
         for (int d = 0; d < 4; d++)
             adjustPoints.addElement(new Point(1, 1));
         int lastX = 0, lastY = 0;
@@ -125,7 +123,7 @@ public class QRCodeDecoder {
         }
         Point[] adjusts = new Point[adjustPoints.size()];
         for (int i = 0; i < adjusts.length; i++)
-            adjusts[i] = (Point) adjustPoints.elementAt(i);
+            adjusts[i] = adjustPoints.elementAt(i);
         return adjusts;
     }
 
@@ -196,8 +194,8 @@ public class QRCodeDecoder {
             return blocks;
         } else { //we have to interleave data blocks because symbol has 2 or more RS blocks
             int numLongerRSBlocks = dataCapacity % numRSBlocks;
+            int lengthRSBlock = dataCapacity / numRSBlocks;
             if (numLongerRSBlocks == 0) { //symbol has only 1 type of RS block
-                int lengthRSBlock = dataCapacity / numRSBlocks;
                 int[][] RSBlocks = new int[numRSBlocks][lengthRSBlock];
                 //obtain RS blocks
                 for (int i = 0; i < numRSBlocks; i++) {
@@ -220,16 +218,15 @@ public class QRCodeDecoder {
                     }
                 }
             } else { //symbol has 2 types of RS blocks
-                int lengthShorterRSBlock = dataCapacity / numRSBlocks;
                 int lengthLongerRSBlock = dataCapacity / numRSBlocks + 1;
                 int numShorterRSBlocks = numRSBlocks - numLongerRSBlocks;
-                int[][] shorterRSBlocks = new int[numShorterRSBlocks][lengthShorterRSBlock];
+                int[][] shorterRSBlocks = new int[numShorterRSBlocks][lengthRSBlock];
                 int[][] longerRSBlocks = new int[numLongerRSBlocks][lengthLongerRSBlock];
                 for (int i = 0; i < numRSBlocks; i++) {
+                    int mod = 0;
                     if (i < numShorterRSBlocks) { //get shorter RS Block(s)
-                        int mod = 0;
-                        for (int j = 0; j < lengthShorterRSBlock; j++) {
-                            if (j == lengthShorterRSBlock - eccPerRSBlock) mod = numLongerRSBlocks;
+                        for (int j = 0; j < lengthRSBlock; j++) {
+                            if (j == lengthRSBlock - eccPerRSBlock) mod = numLongerRSBlocks;
                             shorterRSBlocks[i][j] = blocks[j * numRSBlocks + i + mod];
                         }
                         canvas.println("eccPerRSBlock(shorter)=" + eccPerRSBlock);
@@ -241,9 +238,8 @@ public class QRCodeDecoder {
                             numCorrectionFailures++;
 
                     } else {    //get longer RS Blocks
-                        int mod = 0;
                         for (int j = 0; j < lengthLongerRSBlock; j++) {
-                            if (j == lengthShorterRSBlock - eccPerRSBlock) mod = numShorterRSBlocks;
+                            if (j == lengthRSBlock - eccPerRSBlock) mod = numShorterRSBlocks;
                             longerRSBlocks[i - numShorterRSBlocks][j] = blocks[j * numRSBlocks + i - mod];
                         }
                         canvas.println("eccPerRSBlock(longer)=" + eccPerRSBlock);
@@ -258,7 +254,7 @@ public class QRCodeDecoder {
                 int p = 0;
                 for (int i = 0; i < numRSBlocks; i++) {
                     if (i < numShorterRSBlocks) {
-                        for (int j = 0; j < lengthShorterRSBlock - eccPerRSBlock; j++) {
+                        for (int j = 0; j < lengthRSBlock - eccPerRSBlock; j++) {
                             dataBlocks[p++] = shorterRSBlocks[i][j];
                         }
                     } else {
@@ -269,7 +265,7 @@ public class QRCodeDecoder {
                 }
             }
             if (numSucceededCorrections > 0)
-                canvas.println(String.valueOf(numSucceededCorrections) + " data errors corrected successfully.");
+                canvas.println(numSucceededCorrections + " data errors corrected successfully.");
             else
                 canvas.println("No errors found.");
             numLastCorrectionFailures = numCorrectionFailures;
@@ -280,11 +276,7 @@ public class QRCodeDecoder {
     byte[] getDecodedByteArray(int[] blocks, int version, int numErrorCorrectionCode) throws InvalidDataBlockException {
         byte[] byteArray;
         QRCodeDataBlockReader reader = new QRCodeDataBlockReader(blocks, version, numErrorCorrectionCode);
-        try {
-            byteArray = reader.getDataByte();
-        } catch (InvalidDataBlockException e) {
-            throw e;
-        }
+        byteArray = reader.getDataByte();
         return byteArray;
     }
 
