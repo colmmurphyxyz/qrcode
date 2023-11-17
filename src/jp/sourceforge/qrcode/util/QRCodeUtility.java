@@ -21,27 +21,5 @@ public class QRCodeUtility {
         return g;
     }
 
-// for au by KDDI Profile Phase 3.0
-//	public static int[][] parseImage(Image image) {
-//		int width = image.getWidth();
-//		int height = image.getHeight();
-//		Image mutable = Image.createImage(width, height);
-//		Graphics g = mutable.getGraphics();
-//		g.drawImage(image, 0, 0, Graphics.TOP|Graphics.LEFT);
-//		ExtensionGraphics eg = (ExtensionGraphics) g;
-//		int[][] result = new int[width][height];
-//		
-//		for (int x = 0; x < width; x++) {
-//			for (int y = 0; y < height; y++) {
-//				result[x][y] = eg.getPixel(x, y);
-//			}
-//		}
-//		return result;
-//	}
-//	
-//	public static int[][] parseImage(byte[] imageData) {
-//		return parseImage(Image.createImage(imageData, 0, imageData.length));
-//	}
-
 
 }

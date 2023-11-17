@@ -9,7 +9,7 @@ import java.util.Arrays;
  * @author Masayuki Miyazaki
  * <a href="http://sourceforge.jp/projects/reedsolomon/">ReedSolomon source</a>
  */
-public final class Galois {
+final class Galois {
     public static final int POLYNOMIAL = 0x1d;  // = 0b00011101
     private static final Galois instance = new Galois();
     private final int[] expTbl = new int[255 * 2];    // 二重にもつことによりmul, div等を簡略化
