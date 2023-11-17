@@ -7,8 +7,11 @@ import jp.sourceforge.qrcode.util.QRCodeUtility;
 
 
 /**
- * Class to represent a Point in 2D space
+ * Represents a 2D point with essential functionality for manipulation, including translation,
+ * coordinate retrieval, and geometric calculations. Coordinates are integers for accuracy in discrete spaces,
+ * and directional constants facilitate position assessments relative to other points.
  */
+
 public class Point {
     public static final int RIGHT = 1;
     public static final int BOTTOM = 2;
@@ -18,28 +21,52 @@ public class Point {
     int x;
     int y;
 
+    /**
+     * Default constructor, initializes the point at (0, 0).
+     */
     public Point() {
         x = 0;
         y = 0;
     }
 
+    /**
+     * Initializes a point with the given coordinates.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     */
     public Point(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
+    /**
+     * Gets the x-coordinate of the point.
+     * @return The x-coordinate.
+     */
     public int getX() {
         return x;
     }
 
+    /**
+     * Gets the y-coordinate of the point.
+     * @return The y-coordinate.
+     */
     public int getY() {
         return y;
     }
 
+    /**
+     * Sets the x-coordinate of the point.
+     * @param x The new x-coordinate.
+     */
     public void setX(int x) {
         this.x = x;
     }
 
+    /**
+     * Sets the y-coordinate of the point.
+     * @param y The new y-coordinate.
+     */
     public void setY(int y) {
         this.y = y;
     }
@@ -54,6 +81,11 @@ public class Point {
         this.y += dy;
     }
 
+    /**
+     * Sets the coordinates of the point.
+     * @param x The new x-coordinate.
+     * @param y The new y-coordinate.
+     */
     public void set(int x, int y) {
         this.x = x;
         this.y = y;
