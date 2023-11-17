@@ -27,6 +27,11 @@ public class QRCodeDecoder {
     QRCodeImageReader imageReader;
     int numLastCorrectionFailures;
 
+
+    /**
+     * Class to encapsulate the result of a QR code decoding operation
+     * provides information about the number of error corrections and the decoded bytes in the qr code
+     */
     class DecodeResult {
         int numCorrectionFailures;
         byte[] decodedBytes;
@@ -36,6 +41,10 @@ public class QRCodeDecoder {
             this.numCorrectionFailures = numCorrectionFailures;
         }
 
+        /**
+         *
+         * @return byte[] of the decoded bytes obtained by the QRCodeDecoder
+         */
         public byte[] getDecodedBytes() {
             return decodedBytes;
         }
@@ -63,6 +72,13 @@ public class QRCodeDecoder {
         QRCodeDecoder.canvas = new DebugCanvasAdapter();
     }
 
+    /**
+     * Decodes a qr code from an image
+     * @param qrCodeImage qr code image to decode
+     * @return byte[] decoded byte array, can be interpreted as a character sequence, URL, or a binary blob
+     *      depending on the use case
+     * @throws DecodingFailedException
+     */
     public byte[] decode(QRCodeImage qrCodeImage) throws DecodingFailedException {
         Point[] adjusts = getAdjustPoints();
         Vector<DecodeResult> results = new Vector<>();
@@ -85,8 +101,10 @@ public class QRCodeDecoder {
             }
         }
 
-        if (results.size() == 0)
+        // image unrecognizable, cannot decode
+        if (results.size() == 0) {
             throw new DecodingFailedException("Give up decoding");
+        }
 
         int minErrorIndex = -1;
         int minError = Integer.MAX_VALUE;
@@ -104,13 +122,14 @@ public class QRCodeDecoder {
         return (results.elementAt(minErrorIndex)).getDecodedBytes();
     }
 
-    Point[] getAdjustPoints() {
+    private Point[] getAdjustPoints() {
         // note that adjusts affect dependently
         // i.e. below means (0,0), (2,3), (3,4), (1,2), (2,1), (1,1), (-1,-1)
 
         Vector<Point> adjustPoints = new Vector<>();
-        for (int d = 0; d < 4; d++)
+        for (int d = 0; d < 4; d++) {
             adjustPoints.addElement(new Point(1, 1));
+        }
         int lastX = 0, lastY = 0;
         for (int y = 0; y > -4; y--) {
             for (int x = 0; x > -4; x--) {
@@ -122,12 +141,13 @@ public class QRCodeDecoder {
             }
         }
         Point[] adjusts = new Point[adjustPoints.size()];
-        for (int i = 0; i < adjusts.length; i++)
+        for (int i = 0; i < adjusts.length; i++) {
             adjusts[i] = adjustPoints.elementAt(i);
+        }
         return adjusts;
     }
 
-    DecodeResult decode(QRCodeImage qrCodeImage, Point adjust)
+    private DecodeResult decode(QRCodeImage qrCodeImage, Point adjust)
             throws DecodingFailedException {
         try {
             if (numTryDecode == 0) {
@@ -164,7 +184,7 @@ public class QRCodeDecoder {
     }
 
 
-    int[][] imageToIntArray(QRCodeImage image) {
+    private int[][] imageToIntArray(QRCodeImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
         int[][] intImage = new int[width][height];
@@ -176,7 +196,7 @@ public class QRCodeDecoder {
         return intImage;
     }
 
-    int[] correctDataBlocks(int[] blocks) {
+    private int[] correctDataBlocks(int[] blocks) {
         int numSucceededCorrections = 0;
         int numCorrectionFailures = 0;
         int dataCapacity = qrCodeSymbol.getDataCapacity();
@@ -273,7 +293,7 @@ public class QRCodeDecoder {
         }
     }
 
-    byte[] getDecodedByteArray(int[] blocks, int version, int numErrorCorrectionCode) throws InvalidDataBlockException {
+    private byte[] getDecodedByteArray(int[] blocks, int version, int numErrorCorrectionCode) throws InvalidDataBlockException {
         byte[] byteArray;
         QRCodeDataBlockReader reader = new QRCodeDataBlockReader(blocks, version, numErrorCorrectionCode);
         byteArray = reader.getDataByte();

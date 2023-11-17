@@ -3,7 +3,8 @@ package jp.sourceforge.qrcode.ecc;
 import java.util.Arrays;
 
 /**
- * タイトル: GF(2^8)
+ * This is a singleton class used to perform fast arithmetic via lookup tables
+ * Its only use is in the RsDecode class, so we can migrate its members to the RsDecode class
  *
  * @author Masayuki Miyazaki
  * <a href="http://sourceforge.jp/projects/reedsolomon/">ReedSolomon source</a>
