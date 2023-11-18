@@ -89,7 +89,7 @@ public class QRCodeSymbol {
             alignmentPattern = new Point[logicalSeeds.length][logicalSeeds.length];
         }
 
-        //obtain alignment pattern's center coordintates by logical seeds
+        //obtain alignment pattern's center coordinates by logical seeds
         for (int col = 0; col < logicalSeeds.length; col++) { //列　
             for (int row = 0; row < logicalSeeds.length; row++) { //行
                 alignmentPattern[row][col] = new Point(logicalSeeds[row], logicalSeeds[col]);
@@ -113,7 +113,7 @@ public class QRCodeSymbol {
     public String getVersionReference() {
         final char[] versionReferenceCharacter = {'L', 'M', 'Q', 'H'};
 
-        return Integer.toString(version) + "-" +
+        return version + "-" +
                 versionReferenceCharacter[errorCollectionLevel];
     }
 
@@ -139,17 +139,11 @@ public class QRCodeSymbol {
         int maskPattern = 0x5412;
 
         for (int i = 0; i <= 14; i++) {
-            boolean xorBit = false;
-            if (((maskPattern >>> i) & 1) == 1)
-                xorBit = true;
-            else
-                xorBit = false;
+            boolean xorBit;
+            xorBit = ((maskPattern >>> i) & 1) == 1;
 
             // get unmasked format information with bit shift
-            if (modules[i] == xorBit)
-                modules[i] = false;
-            else
-                modules[i] = true;
+            modules[i] = modules[i] != xorBit;
         }
 
         BCH15_5 corrector = new BCH15_5(modules);
@@ -172,7 +166,7 @@ public class QRCodeSymbol {
 
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
-                if (maskPattern[x][y] == true) {
+                if (maskPattern[x][y]) {
                     reverseElement(x, y);
                 }
             }
@@ -230,8 +224,8 @@ public class QRCodeSymbol {
     }
 
     private int calcDataCapacity() {
-        int numFunctionPatternModule = 0;
-        int numFormatAndVersionInfoModule = 0;
+        int numFunctionPatternModule;
+        int numFormatAndVersionInfoModule;
         int version = this.getVersion();
         //System.out.println("Version:" + String.valueOf(version));
 
@@ -241,19 +235,17 @@ public class QRCodeSymbol {
             numFormatAndVersionInfoModule = 67;
 
 
-        // the number of finter patterns :
+        // the number of fainter patterns :
         int sqrtCenters = (version / 7) + 2;
         // the number of modules left when we remove the patterns modules
         // 3*64 for the 3 big ones,
-        // sqrtCenters*sqrtCenters)-3)*25 for the small ones
+        // (sqrtCenters*sqrtCenters)-3)*25 for the small ones
         int modulesLeft = (version == 1 ? 192 : 192 + ((sqrtCenters * sqrtCenters) - 3) * 25);
         // Don't ask me how I found that one...
         //
         numFunctionPatternModule = modulesLeft + 8 * version + 2 - (sqrtCenters - 2) * 10;
 
-        int dataCapacity = (width * width - numFunctionPatternModule - numFormatAndVersionInfoModule) / 8;
-
-        return dataCapacity;
+        return (width * width - numFunctionPatternModule - numFormatAndVersionInfoModule) / 8;
     }
 
 
@@ -262,18 +254,18 @@ public class QRCodeSymbol {
     }
 
     void decodeFormatInformation(boolean[] formatInformation) {
-        if (formatInformation[4] == false)
-            if (formatInformation[3] == true)
+        if (!formatInformation[4])
+            if (formatInformation[3])
                 errorCollectionLevel = 0;
             else
                 errorCollectionLevel = 1;
-        else if (formatInformation[3] == true)
+        else if (formatInformation[3])
             errorCollectionLevel = 2;
         else
             errorCollectionLevel = 3;
 
         for (int i = 2; i >= 0; i--)
-            if (formatInformation[i] == true)
+            if (formatInformation[i])
                 maskPattern += 1 << i;
     }
 

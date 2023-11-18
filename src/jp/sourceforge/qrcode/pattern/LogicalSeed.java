@@ -7,9 +7,8 @@ public class LogicalSeed {
     /**
      * The positions
      */
-    private static int[][] seed;
-
-    /**
+    private static final int[][] seed;
+    /*
      * The static constructor instantiates the values
      */
     static {
@@ -63,10 +62,10 @@ public class LogicalSeed {
         return (seed[version - 1]);
     }
 
-    /**
+    /*
      * Returns a seed for a version and a pattern number
      */
-    public static int getSeed(int version, int patternNumber) throws IndexOutOfBoundsException {
+    /*public static int getSeed(int version, int patternNumber) throws IndexOutOfBoundsException {
         return (seed[version - 1][patternNumber]);
-    }
+    }*/
 }

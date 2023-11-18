@@ -9,10 +9,10 @@ import jp.sourceforge.qrcode.geom.*;
 import jp.sourceforge.qrcode.util.*;
 
 public class AlignmentPattern {
-    static final int RIGHT = 1;
+    /*static final int RIGHT = 1;
     static final int BOTTOM = 2;
     static final int LEFT = 3;
-    static final int TOP = 4;
+    static final int TOP = 4;*/
 
     static DebugCanvas canvas = QRCodeDecoder.getCanvas();
     Point[][] center;
@@ -30,7 +30,7 @@ public class AlignmentPattern {
         Point[][] logicalCenters = getLogicalCenter(finderPattern);
         int logicalDistance = logicalCenters[1][0].getX() - logicalCenters[0][0].getX();
         //With it converts in order to handle in the same way
-        Point[][] centers = null;
+        Point[][] centers;
         centers = getCenter(image, finderPattern, logicalCenters);
         return new AlignmentPattern(centers, logicalDistance);
 
@@ -40,14 +40,14 @@ public class AlignmentPattern {
         return center;
     }
 
-    // for only trancparency access in version 1, which has no alignment pattern
-    public void setCenter(Point[][] center) {
+    // for only transparency access in version 1, which has no alignment pattern
+    /*public void setCenter(Point[][] center) {
         this.center = center;
-    }
+    }*/
 
-    public int getLogicalDistance() {
+    /*public int getLogicalDistance() {
         return patternDistance;
-    }
+    }*/
 
     static Point[][] getCenter(boolean[][] image, FinderPattern finderPattern, Point[][] logicalCenters)
             throws AlignmentPatternNotFoundException {
@@ -77,15 +77,15 @@ public class AlignmentPattern {
 //					canvas.drawCross(centers[x][y], java.awt.Color.MAGENTA);
                     continue;
                 }
-                Point target = null;
+                Point target;
                 if (y == 0) {
-                    if (x > 0 && x < sqrtCenters - 1) {
+                    if (x < sqrtCenters - 1) {
                         target = axis.translate(centers[x - 1][y], logicalCenters[x][y].getX() - logicalCenters[x - 1][y].getX(), 0);
                         centers[x][y] = new Point(target.getX(), target.getY());
                         canvas.drawCross(centers[x][y], Color.RED);
                     }
                 } else if (x == 0) {
-                    if (y > 0 && y < sqrtCenters - 1) {
+                    if (y < sqrtCenters - 1) {
                         target = axis.translate(centers[x][y - 1], 0, logicalCenters[x][y].getY() - logicalCenters[x][y - 1].getY());
                         centers[x][y] = new Point(target.getX(), target.getY());
                         canvas.drawCross(centers[x][y], Color.RED);
@@ -185,7 +185,7 @@ public class AlignmentPattern {
 		axis.setOrigin(finderPattern.getCenter(FinderPattern.DL));
 		centers[0][sqrtCenters - 1] = axis.translate(3, -3);
 		//centers[0][sqrtCenters - 1] = finderPattern.getCenter(FinderPattern.DL);
-
+        }
 		for (int y = 0; y < sqrtCenters; y++) {
 			for (int x = 0; x < sqrtCenters; x++) {
 				if (x == 1 && y == 0 && sqrtCenters == 3) { //型番7〜13の中央上の位置合せパターン
@@ -279,8 +279,8 @@ public class AlignmentPattern {
     //get logical center coordinates of each alignment patterns
     public static Point[][] getLogicalCenter(FinderPattern finderPattern) {
         int version = finderPattern.getVersion();
-        Point[][] logicalCenters = new Point[1][1];
-        int[] logicalSeeds = new int[1];
+        Point[][] logicalCenters;
+        int[] logicalSeeds;
         //create "column(row)-coordinates" which based on relative coordinates
         //int sqrtCenters = (version / 7) + 2;
         //logicalSeeds = new int[sqrtCenters];
