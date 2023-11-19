@@ -35,8 +35,8 @@ public class QRCodeDataBlockReader {
         this.blocks = blocks;
         this.numErrorCorrectionCode = numErrorCorrectionCode;
         if (version <= 9) dataLengthMode = 0;
-        else if (version >= 10 && version <= 26) dataLengthMode = 1;
-        else if (version >= 27 && version <= 40) dataLengthMode = 2;
+        else if (version <= 26) dataLengthMode = 1;
+        else if (version <= 40) dataLengthMode = 2;
         canvas = QRCodeDecoder.getCanvas();
     }
 
@@ -44,7 +44,7 @@ public class QRCodeDataBlockReader {
 //		System.out.println("numBits:" + String.valueOf(numBits));
 //		System.out.println("blockPointer:" + String.valueOf(blockPointer));
 //		System.out.println("bitPointer:" + String.valueOf(bitPointer));
-        int bits = 0;
+        int bits;
         if (numBits < bitPointer + 1) { // next word fits into current data block
             int mask = 0;
             for (int i = 0; i < numBits; i++) {
@@ -118,39 +118,16 @@ public class QRCodeDataBlockReader {
 //		MODE_ROMAN_AND_NUMBER = 2;
 //		MODE_8BIT_BYTE = 4;
 //		MODE_KANJI = 8;
-        switch (mode) {
-            case 3:
-                return MODE_NUMBER;
-            case 5:
-                return MODE_8BIT_BYTE;
-            case 6:
-                return MODE_8BIT_BYTE;
-            case 7:
-                return MODE_8BIT_BYTE;
-            case 9:
-                return MODE_KANJI;
-            case 10:
-                return MODE_KANJI;
-            case 11:
-                return MODE_KANJI;
-            case 12:
-                return MODE_8BIT_BYTE;
-            case 13:
-                return MODE_8BIT_BYTE;
-            case 14:
-                return MODE_8BIT_BYTE;
-            case 15:
-                return MODE_8BIT_BYTE;
-            default:
-                return MODE_KANJI;
-        }
+        return switch (mode) {
+            case 3 -> MODE_NUMBER;
+            case 5, 6, 7, 12, 13, 14, 15 -> MODE_8BIT_BYTE;
+            default -> MODE_KANJI;
+        };
     }
 
     int getDataLength(int modeIndicator) throws ArrayIndexOutOfBoundsException {
         int index = 0;
-        while (true) {
-            if ((modeIndicator >> index) == 1)
-                break;
+        while ((modeIndicator >> index) != 1) {
             index++;
         }
 
@@ -218,7 +195,7 @@ public class QRCodeDataBlockReader {
 
     public String getDataString() throws ArrayIndexOutOfBoundsException {
         canvas.println("Reading data blocks...");
-        String dataString = "";
+        StringBuilder dataString = new StringBuilder();
         do {
             int mode = getNextMode();
             canvas.println("mode: " + mode);
@@ -240,57 +217,57 @@ public class QRCodeDataBlockReader {
             switch (mode) {
                 case MODE_NUMBER:
                     //canvas.println("Mode: Figure");
-                    dataString += getFigureString(dataLength);
+                    dataString.append(getFigureString(dataLength));
                     break;
                 case MODE_ROMAN_AND_NUMBER:
                     //canvas.println("Mode: Roman&Figure");
-                    dataString += getRomanAndFigureString(dataLength);
+                    dataString.append(getRomanAndFigureString(dataLength));
                     break;
                 case MODE_8BIT_BYTE:
                     //canvas.println("Mode: 8bit Byte");
-                    dataString += get8bitByteString(dataLength);
+                    dataString.append(get8bitByteString(dataLength));
                     break;
                 case MODE_KANJI:
                     //canvas.println("Mode: Kanji");
-                    dataString += getKanjiString(dataLength);
+                    dataString.append(getKanjiString(dataLength));
                     break;
             }
             //canvas.println("DataLength: " + dataLength);
             //System.out.println(dataString);
         } while (true);
-        System.out.println("");
-        return dataString;
+        System.out.println();
+        return dataString.toString();
     }
 
 
     String getFigureString(int dataLength) throws ArrayIndexOutOfBoundsException {
         int length = dataLength;
         int intData = 0;
-        String strData = "";
+        StringBuilder strData = new StringBuilder();
         do {
             if (length >= 3) {
                 intData = getNextBits(10);
-                if (intData < 100) strData += "0";
-                if (intData < 10) strData += "0";
+                if (intData < 100) strData.append("0");
+                if (intData < 10) strData.append("0");
                 length -= 3;
             } else if (length == 2) {
                 intData = getNextBits(7);
-                if (intData < 10) strData += "0";
+                if (intData < 10) strData.append("0");
                 length -= 2;
             } else if (length == 1) {
                 intData = getNextBits(4);
                 length -= 1;
             }
-            strData += Integer.toString(intData);
+            strData.append(intData);
         } while (length > 0);
 
-        return strData;
+        return strData.toString();
     }
 
     String getRomanAndFigureString(int dataLength) throws ArrayIndexOutOfBoundsException {
         int length = dataLength;
-        int intData = 0;
-        String strData = "";
+        int intData;
+        StringBuilder strData = new StringBuilder();
         final char[] tableRomanAndFigure = {
                 '0', '1', '2', '3', '4', '5',
                 '6', '7', '8', '9', 'A', 'B',
@@ -306,22 +283,22 @@ public class QRCodeDataBlockReader {
                 intData = getNextBits(11);
                 int firstLetter = intData / 45;
                 int secondLetter = intData % 45;
-                strData += String.valueOf(tableRomanAndFigure[firstLetter]);
-                strData += String.valueOf(tableRomanAndFigure[secondLetter]);
+                strData.append(tableRomanAndFigure[firstLetter]);
+                strData.append(tableRomanAndFigure[secondLetter]);
                 length -= 2;
             } else if (length == 1) {
                 intData = getNextBits(6);
-                strData += String.valueOf(tableRomanAndFigure[intData]);
+                strData.append(tableRomanAndFigure[intData]);
                 length -= 1;
             }
         } while (length > 0);
 
-        return strData;
+        return strData.toString();
     }
 
     public byte[] get8bitByteArray(int dataLength) throws ArrayIndexOutOfBoundsException {
         int length = dataLength;
-        int intData = 0;
+        int intData;
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
         do {
@@ -334,27 +311,27 @@ public class QRCodeDataBlockReader {
 
     String get8bitByteString(int dataLength) throws ArrayIndexOutOfBoundsException {
         int length = dataLength;
-        int intData = 0;
-        String strData = "";
+        int intData;
+        StringBuilder strData = new StringBuilder();
         do {
             intData = getNextBits(8);
-            strData += (char) intData;
+            strData.append((char) intData);
             length--;
         } while (length > 0);
-        return strData;
+        return strData.toString();
     }
 
     String getKanjiString(int dataLength) throws ArrayIndexOutOfBoundsException {
         int length = dataLength;
-        int intData = 0;
-        String unicodeString = "";
+        int intData;
+        StringBuilder unicodeString = new StringBuilder();
         do {
             intData = getNextBits(13);
             int lowerByte = intData % 0xC0;
             int higherByte = intData / 0xC0;
 
             int tempWord = (higherByte << 8) + lowerByte;
-            int shiftjisWord = 0;
+            int shiftjisWord;
             if (tempWord + 0x8140 <= 0x9FFC) { // between 8140 - 9FFC on Shift_JIS character set
                 shiftjisWord = tempWord + 0x8140;
             } else { // between E040 - EBBF on Shift_JIS character set
@@ -365,7 +342,7 @@ public class QRCodeDataBlockReader {
             tempByte[0] = (byte) (shiftjisWord >> 8);
             tempByte[1] = (byte) (shiftjisWord & 0xFF);
             try {
-                unicodeString += new String(tempByte, "Shift_JIS");
+                unicodeString.append(new String(tempByte, "Shift_JIS"));
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -373,7 +350,7 @@ public class QRCodeDataBlockReader {
         } while (length > 0);
 
 
-        return unicodeString;
+        return unicodeString.toString();
     }
 
 }
