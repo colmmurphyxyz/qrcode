@@ -36,40 +36,14 @@ public class QRCodeImageReader {
     }
 
     // local class for module pitch
-    protected class ModulePitch {
+    protected static class ModulePitch {
         public int top;
         public int left;
         public int bottom;
         public int right;
     }
 
-    ;
-
-
-    boolean[][] applyMedianFilter(boolean[][] image, int threshold) {
-        boolean[][] filteredMatrix = new boolean[image.length][image[0].length];
-        //filtering noise in image with median filter
-        int numPointDark;
-        for (int y = 1; y < image[0].length - 1; y++) {
-            for (int x = 1; x < image.length - 1; x++) {
-                //if (image[x][y] == true) {
-                numPointDark = 0;
-                for (int fy = -1; fy < 2; fy++) {
-                    for (int fx = -1; fx < 2; fx++) {
-                        if (image[x + fx][y + fy] == true) {
-                            numPointDark++;
-                        }
-                    }
-                }
-                if (numPointDark > threshold)
-                    filteredMatrix[x][y] = POINT_DARK;
-            }
-        }
-
-        return filteredMatrix;
-    }
-
-    boolean[][] applyCrossMaskingMedianFilter(boolean[][] image, int threshold) {
+    boolean[][] applyCrossMaskingMedianFilter(boolean[][] image) {
         boolean[][] filteredMatrix = new boolean[image.length][image[0].length];
         //filtering noise in image with median filter
         int numPointDark;
@@ -78,14 +52,14 @@ public class QRCodeImageReader {
                 //if (image[x][y] == true) {
                 numPointDark = 0;
                 for (int f = -2; f < 3; f++) {
-                    if (image[x + f][y] == true)
+                    if (image[x + f][y])
                         numPointDark++;
 
-                    if (image[x][y + f] == true)
+                    if (image[x][y + f])
                         numPointDark++;
                 }
 
-                if (numPointDark > threshold)
+                if (numPointDark > 5)
                     filteredMatrix[x][y] = POINT_DARK;
             }
         }
@@ -95,8 +69,7 @@ public class QRCodeImageReader {
 
     boolean[][] filterImage(int[][] image) {
         imageToGrayScale(image);
-        boolean[][] bitmap = grayScaleToBitmap(image);
-        return bitmap;
+        return grayScaleToBitmap(image);
     }
 
     void imageToGrayScale(int[][] image) {
@@ -122,7 +95,7 @@ public class QRCodeImageReader {
             for (int ax = 0; ax < sqrtNumArea; ax++) {
                 for (int dy = 0; dy < areaHeight; dy++) {
                     for (int dx = 0; dx < areaWidth; dx++) {
-                        bitmap[areaWidth * ax + dx][areaHeight * ay + dy] = (grayScale[areaWidth * ax + dx][areaHeight * ay + dy] < middle[ax][ay]) ? true : false;
+                        bitmap[areaWidth * ax + dx][areaHeight * ay + dy] = grayScale[areaWidth * ax + dx][areaHeight * ay + dy] < middle[ax][ay];
                     }
                 }
             }
@@ -164,25 +137,23 @@ public class QRCodeImageReader {
 
     public QRCodeSymbol getQRCodeSymbol(int[][] image)
             throws SymbolNotFoundException {
-        int longSide = (image.length < image[0].length) ? image[0].length : image.length;
+        int longSide = Math.max(image.length, image[0].length);
         QRCodeImageReader.DECIMAL_POINT = 23 - QRCodeUtility.sqrt(longSide / 256);
         bitmap = filterImage(image);
         canvas.println("Drawing matrix.");
         canvas.drawMatrix(bitmap);
 
         canvas.println("Scanning Finder Pattern.");
-        FinderPattern finderPattern = null;
+        FinderPattern finderPattern;
         try {
             finderPattern = FinderPattern.findFinderPattern(bitmap);
         } catch (FinderPatternNotFoundException e) {
             canvas.println("Not found, now retrying...");
-            bitmap = applyCrossMaskingMedianFilter(bitmap, 5);
+            bitmap = applyCrossMaskingMedianFilter(bitmap);
             canvas.drawMatrix(bitmap);
             try {
                 finderPattern = FinderPattern.findFinderPattern(bitmap);
-            } catch (FinderPatternNotFoundException e2) {
-                throw new SymbolNotFoundException(e2.getMessage());
-            } catch (VersionInformationException e2) {
+            } catch (FinderPatternNotFoundException | VersionInformationException e2) {
                 throw new SymbolNotFoundException(e2.getMessage());
             }
         } catch (VersionInformationException e) {
@@ -197,14 +168,14 @@ public class QRCodeImageReader {
                         finderPattern.getCenter(FinderPattern.DL).toString();
         canvas.println(finderPatternCoordinates);
         int[] sincos = finderPattern.getAngle();
-        canvas.println("Angle*4098: Sin " + Integer.toString(sincos[0]) + "  " + "Cos " + Integer.toString(sincos[1]));
+        canvas.println("Angle*4098: Sin " + sincos[0] + "  " + "Cos " + sincos[1]);
 
         int version = finderPattern.getVersion();
-        canvas.println("Version: " + Integer.toString(version));
+        canvas.println("Version: " + version);
         if (version < 1 || version > 40)
             throw new InvalidVersionException("Invalid version: " + version);
 
-        AlignmentPattern alignmentPattern = null;
+        AlignmentPattern alignmentPattern;
         try {
             alignmentPattern = AlignmentPattern.findAlignmentPattern(bitmap, finderPattern);
         } catch (AlignmentPatternNotFoundException e) {
@@ -214,11 +185,11 @@ public class QRCodeImageReader {
         int matrixLength = alignmentPattern.getCenter().length;
         canvas.println("AlignmentPatterns at");
         for (int y = 0; y < matrixLength; y++) {
-            String alignmentPatternCoordinates = "";
+            StringBuilder alignmentPatternCoordinates = new StringBuilder();
             for (int x = 0; x < matrixLength; x++) {
-                alignmentPatternCoordinates += alignmentPattern.getCenter()[x][y].toString();
+                alignmentPatternCoordinates.append(alignmentPattern.getCenter()[x][y].toString());
             }
-            canvas.println(alignmentPatternCoordinates);
+            canvas.println(alignmentPatternCoordinates.toString());
         }
         //for(int i = 0; i < 500000; i++) System.out.println("");
 
@@ -227,7 +198,7 @@ public class QRCodeImageReader {
         //samplingGrid = getSamplingGrid2_6(finderPattern, alignmentPattern);
         samplingGrid = getSamplingGrid(finderPattern, alignmentPattern);
         canvas.println("Reading grid.");
-        boolean[][] qRCodeMatrix = null;
+        boolean[][] qRCodeMatrix;
         try {
             qRCodeMatrix = getQRCodeMatrix(bitmap, samplingGrid);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -245,7 +216,7 @@ public class QRCodeImageReader {
         samplingGrid.adjust(adjust);
         canvas.println("Sampling grid adjusted d(" + adjust.getX() + "," + adjust.getY() + ")");
 
-        boolean[][] qRCodeMatrix = null;
+        boolean[][] qRCodeMatrix;
         try {
             qRCodeMatrix = getQRCodeMatrix(bitmap, samplingGrid);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -259,7 +230,7 @@ public class QRCodeImageReader {
      */
     SamplingGrid getSamplingGrid(FinderPattern finderPattern, AlignmentPattern alignmentPattern) {
 
-        Point centers[][] = alignmentPattern.getCenter();
+        Point[][] centers = alignmentPattern.getCenter();
 
         int version = finderPattern.getVersion();
         int sqrtCenters = (version / 7) + 2;
@@ -290,7 +261,7 @@ public class QRCodeImageReader {
                 baseLineY = new Line();
                 axis.setModulePitch(finderPattern.getModuleSize());
 
-                Point logicalCenters[][] = AlignmentPattern.getLogicalCenter(finderPattern);
+                Point[][] logicalCenters = AlignmentPattern.getLogicalCenter(finderPattern);
 
                 Point upperLeftPoint = centers[ax][ay];
                 Point upperRightPoint = centers[ax + 1][ay];
@@ -460,8 +431,7 @@ public class QRCodeImageReader {
         Line tempLine;
         tempLine = new Line(start, end);
         int realDistance = tempLine.getLength();
-        int modulePitch = (realDistance << DECIMAL_POINT) / logicalDistance;
-        return modulePitch;
+        return (realDistance << DECIMAL_POINT) / logicalDistance;
     }
 
 
@@ -480,7 +450,7 @@ public class QRCodeImageReader {
         boolean[][] sampledMatrix = new boolean[gridSize][gridSize];
         for (int ay = 0; ay < gridLines.getHeight(); ay++) {
             for (int ax = 0; ax < gridLines.getWidth(); ax++) {
-                Vector sampledPoints = new Vector(); //only for visualize;
+                Vector sampledPoints = new Vector();
                 for (int y = 0; y < gridLines.getHeight(ax, ay); y++) {
                     for (int x = 0; x < gridLines.getWidth(ax, ay); x++) {
                         int x1 = gridLines.getXLine(ax, ay, x).getP1().getX();
