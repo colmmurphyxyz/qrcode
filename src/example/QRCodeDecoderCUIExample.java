@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 
 import jp.sourceforge.qrcode.util.DebugCanvas;
-import jp.sourceforge.qrcode.util.DebugCanvasAdapter;
 
 import java.net.URL;
 
@@ -95,7 +94,7 @@ class J2SEImage implements QRCodeImage {
     }
 }
 
-class J2SECanvas extends DebugCanvasAdapter {
+class J2SECanvas implements DebugCanvas {
     public void println(String s) {
         //System.err.println(s);
     }
