@@ -1,16 +1,16 @@
-package jp.sourceforge.reedsolomon;
+package jp.sourceforge.qrcode.ecc;
 
 /**
- * タイトル: RSコード・デコーダ
+ * ReedSolomon code Decoder
  *
  * @author Masayuki Miyazaki
- * http://sourceforge.jp/projects/reedsolomon/
+ * <a href="http://sourceforge.jp/projects/reedsolomon/">...</a>
  */
 public class RsDecode {
     public static final int RS_PERM_ERROR = -1;
     public static final int RS_CORRECT_ERROR = -2;
     private static final Galois galois = Galois.getInstance();
-    private int npar;
+    private final int npar;
 
     public RsDecode(int npar) {
         this.npar = npar;
@@ -32,7 +32,7 @@ public class RsDecode {
      * >= 0: σの次数
      * < 0: エラー
      */
-    public int calcSigmaMBM(int[] sigma, int[] omega, int[] syn) {
+    private int calcSigmaMBM(int[] sigma, int[] omega, int[] syn) {
         int[] sg0 = new int[npar];
         int[] sg1 = new int[npar];
         sg0[1] = 1;
@@ -77,10 +77,10 @@ public class RsDecode {
     }
 
     /**
-     * チェン探索により誤り位置を求める
-     * σ(z) = 0の解を探索する
-     * ただし、探索はデータ長以内の解のみで
-     * jisu個の解が見つからなければ、エラーとする
+     * Find error position using Chien Search
+     * search for a solution for σ(z) = 0
+     * However, the search is limited to solutions within the data length.
+     * If jisu solutions are not found, an error will occur.
      *
      * @param pos   int[]
      *              誤り位置格納用配列、jisu個の領域が必要
@@ -146,6 +146,7 @@ public class RsDecode {
     }
 
     /**
+     * Forney error correction
      * Forney法で誤り訂正を行う
      * σ(z) = (1-α^i*z)(1-α^j*z)(1-α^k*z)
      * σ'(z) = α^i * (1-α^j*z)(1-α^k*z)...
@@ -197,43 +198,43 @@ public class RsDecode {
     }
 
     /**
-     * RSコードのデコード
+     * ReedSolomon code decoding
      *
      * @param data      int[]
-     *                  入力データ配列
+     *                  input data array
      * @param length    int
-     *                  パリティを含めたデータ長
+     *                  data length including parity
      * @param noCorrect boolean
-     *                  チェックのみで訂正は行わない
+     *                  only check, do not correct errors
      * @return int
-     * 0: エラーなし
-     * > 0: 戻り値個の誤りを訂正した
-     * < 0: 訂正不能
+     * 0: no errors
+     * > 0: Corrected errors in return value
+     * < 0: uncorrectable, too many errors
      */
     public int decode(int[] data, int length, boolean noCorrect) {
         if (length < npar || length > 255) {
             return RS_PERM_ERROR;
         }
-        // シンドロームを計算
+        // calculate syndrome
         int[] syn = new int[npar];
         if (galois.calcSyndrome(data, length, syn)) {
-            return 0;        // エラー無し
+            return 0;        // no errors
         }
-        // シンドロームよりσとωを求める
+        // find sigma and omega from the syndrome
         int[] sigma = new int[npar / 2 + 2];
         int[] omega = new int[npar / 2 + 1];
         int jisu = calcSigmaMBM(sigma, omega, syn);
         if (jisu <= 0) {
             return RS_CORRECT_ERROR;
         }
-        // チェン探索により誤り位置を求める
+        // find error position using chien search
         int[] pos = new int[jisu];
         int r = chienSearch(pos, length, jisu, sigma);
         if (r < 0) {
             return r;
         }
         if (!noCorrect) {
-            // 誤り訂正
+            // perform error correction
             doForney(data, length, jisu, pos, sigma, omega);
         }
         return jisu;
@@ -246,23 +247,4 @@ public class RsDecode {
     public int decode(int[] data) {
         return decode(data, data.length, false);
     }
-
-/*
-	public static void main(String[] args) {
-		int[] data = new int[] {
-			32, 65, 205, 69, 41, 220, 46, 128, 236,
-			42, 159, 74, 221, 244, 169, 239, 150, 138, 70, 237, 85, 224, 96, 74, 219, 61
-		};
-		RsDecode dec = new RsDecode(17);
-		int r = dec.decode(data);
-		System.out.println("r=" + r);
-		for(int i = 0; i < 8; i++) {
-			data[i] ^= (int) (Math.random() * 256);
-		}
-		System.out.println(java.util.Arrays.toString(data));
-		r = dec.decode(data);
-		System.out.println("r=" + r);
-		System.out.println(java.util.Arrays.toString(data));
-	}
-*/
 }
