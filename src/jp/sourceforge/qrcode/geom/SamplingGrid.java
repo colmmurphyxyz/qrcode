@@ -8,7 +8,7 @@ public class SamplingGrid {
     /**
      * A grid for a single area
      */
-    private class AreaGrid {
+    private static class AreaGrid {
         protected Line[] xLine;
         protected Line[] yLine;
 
@@ -52,7 +52,7 @@ public class SamplingGrid {
 
     ;
 
-    private AreaGrid[][] grid;
+    private final AreaGrid[][] grid;
 
     public SamplingGrid(int sqrtNumArea) {
         grid = new AreaGrid[sqrtNumArea][sqrtNumArea];

@@ -4,7 +4,7 @@ import jp.sourceforge.qrcode.geom.Line;
 import jp.sourceforge.qrcode.geom.Point;
 
 /*
- * This class must be an "edition independent" class for debug information controll.
+ * This class must be an "edition independent" class for debug information control.
  * I think it's good idea to modify this class with a adapter pattern
  */
 public class DebugCanvasAdapter implements DebugCanvas {

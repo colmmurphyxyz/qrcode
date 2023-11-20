@@ -91,7 +91,7 @@ public class Point {
      * @return true, if the two points have identical x and y values, false otherwise
      */
     public boolean equals(Point compare) {
-        return (x == compare.x && y == compare.y);
+        return (x != compare.x || y != compare.y);
     }
 
     /**
