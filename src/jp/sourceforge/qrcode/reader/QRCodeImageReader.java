@@ -275,8 +275,8 @@ public class QRCodeImageReader {
 
                 if (ax == 0 && ay == 0) // left upper corner
                 {
+                    upperLeftPoint = axis.translate(upperLeftPoint, -3, -3);
                     if (sqrtNumArea == 1) {
-                        upperLeftPoint = axis.translate(upperLeftPoint, -3, -3);
                         upperRightPoint = axis.translate(upperRightPoint, 3, -3);
                         lowerLeftPoint = axis.translate(lowerLeftPoint, -3, 3);
                         lowerRightPoint = axis.translate(lowerRightPoint, 6, 6);
@@ -286,7 +286,6 @@ public class QRCodeImageReader {
                         logicalLowerLeftPoint.translate(-3, 3);
                         logicalLowerRightPoint.translate(6, 6);
                     } else {
-                        upperLeftPoint = axis.translate(upperLeftPoint, -3, -3);
                         upperRightPoint = axis.translate(upperRightPoint, 0, -6);
                         lowerLeftPoint = axis.translate(lowerLeftPoint, -6, 0);
 

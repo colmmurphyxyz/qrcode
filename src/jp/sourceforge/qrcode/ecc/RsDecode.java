@@ -122,11 +122,7 @@ public class RsDecode {
              * σ(z) = 1 + σ1α^I + σ2(α^I)^2 + σ3(α^I)^3 + ... + σ<jisu>/(α^I)^<jisu>
              *       = 1 + σ1α^I + σ2α^(I*2) + σ3α^(I*3) + ... + σ<jisu>α^(I*<jisu>)
              */
-            int z = 255 - i;                    // z = 1/α^iのスカラー
-            int wk = 1;
-            for (int j = 1; j <= jisu; j++) {
-                wk ^= galois.mulExp(sigma[j], (z * j) % 255);
-            }
+            int wk = getWk(jisu, sigma, i);
             if (wk == 0) {
                 int pv = galois.toExp(i);        // σ(z) = 0の解
                 last ^= pv;                    // lastから今見つかった解を引く
@@ -143,6 +139,15 @@ public class RsDecode {
         }
         // 探索によりデータ長以内に、jisu個の解が見つからなかった
         return RS_CORRECT_ERROR;
+    }
+
+    private static int getWk(int jisu, int[] sigma, int i) {
+        int z = 255 - i;                    // z = 1/α^iのスカラー
+        int wk = 1;
+        for (int j = 1; j <= jisu; j++) {
+            wk ^= galois.mulExp(sigma[j], (z * j) % 255);
+        }
+        return wk;
     }
 
     /**
