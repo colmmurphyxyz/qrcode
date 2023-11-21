@@ -60,10 +60,6 @@ public class QRCodeDecoderCUIExample {
             canvas.println("Error: " + e.getMessage() + " " + filename);
             System.out.println("Error: " + e.getMessage() + " " + filename);
             return false;
-        } catch (DecodingFailedException dfe) {
-            canvas.println("Error: " + dfe.getMessage());
-            System.out.println("Error: " + dfe.getMessage());
-            return false;
         } catch (Exception e) {
             canvas.println("Error: " + e.getMessage());
             System.out.println("Error: " + e.getMessage());

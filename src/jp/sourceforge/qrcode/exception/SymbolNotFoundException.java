@@ -1,7 +1,7 @@
 package jp.sourceforge.qrcode.exception;
 
 /**
- * When a symbol cannot be located during QR code decoding, an exception is thorwn.
+ * When a symbol cannot be located during QR code decoding, an exception is thrown.
  */
 public class SymbolNotFoundException extends IllegalArgumentException {
     String message;

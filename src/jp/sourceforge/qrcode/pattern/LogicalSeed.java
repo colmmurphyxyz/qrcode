@@ -7,11 +7,8 @@ public class LogicalSeed {
     /**
      * The positions
      */
-    private static int[][] seed;
+    private static final int[][] seed;
 
-    /**
-     * The static constructor instantiates the values
-     */
     static {
         seed = new int[40][];
         seed[0] = new int[]{6, 14};

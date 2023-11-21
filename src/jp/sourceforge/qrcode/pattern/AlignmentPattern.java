@@ -30,7 +30,7 @@ public class AlignmentPattern {
         Point[][] logicalCenters = getLogicalCenter(finderPattern);
         int logicalDistance = logicalCenters[1][0].getX() - logicalCenters[0][0].getX();
         //With it converts in order to handle in the same way
-        Point[][] centers = null;
+        Point[][] centers;
         centers = getCenter(image, finderPattern, logicalCenters);
         return new AlignmentPattern(centers, logicalDistance);
 
@@ -40,7 +40,7 @@ public class AlignmentPattern {
         return center;
     }
 
-    // for only trancparency access in version 1, which has no alignment pattern
+    // for only transparency access in version 1, which has no alignment pattern
     public void setCenter(Point[][] center) {
         this.center = center;
     }
@@ -77,15 +77,15 @@ public class AlignmentPattern {
 //					canvas.drawCross(centers[x][y], java.awt.Color.MAGENTA);
                     continue;
                 }
-                Point target = null;
+                Point target;
                 if (y == 0) {
-                    if (x > 0 && x < sqrtCenters - 1) {
+                    if (x < sqrtCenters - 1) {
                         target = axis.translate(centers[x - 1][y], logicalCenters[x][y].getX() - logicalCenters[x - 1][y].getX(), 0);
                         centers[x][y] = new Point(target.getX(), target.getY());
                         canvas.drawCross(centers[x][y], Color.RED);
                     }
                 } else if (x == 0) {
-                    if (y > 0 && y < sqrtCenters - 1) {
+                    if (y < sqrtCenters - 1) {
                         target = axis.translate(centers[x][y - 1], 0, logicalCenters[x][y].getY() - logicalCenters[x][y - 1].getY());
                         centers[x][y] = new Point(target.getX(), target.getY());
                         canvas.drawCross(centers[x][y], Color.RED);
@@ -257,10 +257,10 @@ public class AlignmentPattern {
         y = uy = dy = targetPoint.getY();
 
         // GuoQing Hu's FIX
-        while (lx >= 1 && !targetPointOnTheCorner(image, lx, y, lx - 1, y)) lx--;
-        while (rx < image.length - 1 && !targetPointOnTheCorner(image, rx, y, rx + 1, y)) rx++;
-        while (uy >= 1 && !targetPointOnTheCorner(image, x, uy, x, uy - 1)) uy--;
-        while (dy < image[0].length - 1 && !targetPointOnTheCorner(image, x, dy, x, dy + 1)) dy++;
+        while (lx >= 1 && targetPointOnTheCorner(image, lx, y, lx - 1, y)) lx--;
+        while (rx < image.length - 1 && targetPointOnTheCorner(image, rx, y, rx + 1, y)) rx++;
+        while (uy >= 1 && targetPointOnTheCorner(image, x, uy, x, uy - 1)) uy--;
+        while (dy < image[0].length - 1 && targetPointOnTheCorner(image, x, dy, x, dy + 1)) dy++;
 
         return new Point((lx + rx + 1) / 2, (uy + dy + 1) / 2);
     }
@@ -271,16 +271,16 @@ public class AlignmentPattern {
             throw new AlignmentPatternNotFoundException("Alignment Pattern Finder exceeded image edge");
             //return true;
         } else {
-            return (image[x][y] == QRCodeImageReader.POINT_LIGHT &&
-                    image[nx][ny] == QRCodeImageReader.POINT_DARK);
+            return (image[x][y] != QRCodeImageReader.POINT_LIGHT ||
+                    image[nx][ny] != QRCodeImageReader.POINT_DARK);
         }
     }
 
     //get logical center coordinates of each alignment patterns
     public static Point[][] getLogicalCenter(FinderPattern finderPattern) {
         int version = finderPattern.getVersion();
-        Point[][] logicalCenters = new Point[1][1];
-        int[] logicalSeeds = new int[1];
+        Point[][] logicalCenters;
+        int[] logicalSeeds;
         //create "column(row)-coordinates" which based on relative coordinates
         //int sqrtCenters = (version / 7) + 2;
         //logicalSeeds = new int[sqrtCenters];

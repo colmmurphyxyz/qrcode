@@ -294,8 +294,8 @@ public class FinderPattern {
         Line remoteLine = Line.getLongest(additionalLine);
         Point originPoint = new Point();
         for (int i = 0; i < centers.length; i++) {
-            if (!remoteLine.getP1().equals(centers[i]) &&
-                    !remoteLine.getP2().equals(centers[i])) {
+            if (remoteLine.getP1().equals(centers[i]) &&
+                    remoteLine.getP2().equals(centers[i])) {
                 originPoint = centers[i];
                 break;
             }
@@ -402,8 +402,8 @@ public class FinderPattern {
 
         //last of centers is Left-Up patterns one
         for (int i = 0; i < centers.length; i++) {
-            if (!centers[i].equals(sortedCenters[1]) &&
-                    !centers[i].equals(sortedCenters[2])) {
+            if (centers[i].equals(sortedCenters[1]) &&
+                    centers[i].equals(sortedCenters[2])) {
                 sortedCenters[0] = centers[i];
             }
         }
