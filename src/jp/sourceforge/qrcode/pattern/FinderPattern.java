@@ -39,11 +39,15 @@ public class FinderPattern {
             VersionInformationException {
         Line[] lineAcross = findLineAcross(image);
         Line[] lineCross = findLineCross(lineAcross);
-        Point[] center;
-        center = getCenter(lineCross);
+        Point[] center = null;
+        try {
+            center = getCenter(lineCross);
+        } catch (FinderPatternNotFoundException e) {
+            throw e;
+        }
         int[] sincos = getAngle(center);
         center = sort(center, sincos);
-        int[] width = getWidth(image, center);
+        int[] width = getWidth(image, center, sincos);
         // moduleSize for version recognition
         int[] moduleSize = {(width[UL] << QRCodeImageReader.DECIMAL_POINT) / 7,
                 (width[UR] << QRCodeImageReader.DECIMAL_POINT) / 7,
@@ -251,7 +255,7 @@ public class FinderPattern {
                     compareLine = (Line) lineNeighbor.lastElement();
                     /*
                      * determine lines across Finder Patterns when number of neighbour lines are
-                     * bigger than 1/6 length of themselves
+                     * bigger than 1/6 length of theirselves
                      */
                     if (lineNeighbor.size() * 6 > compareLine.getLength()) {
                         crossLines.addElement(lineNeighbor.elementAt(lineNeighbor.size() / 2));
@@ -289,10 +293,10 @@ public class FinderPattern {
         // remoteLine - does not contain UL center
         Line remoteLine = Line.getLongest(additionalLine);
         Point originPoint = new Point();
-        for (Point point : centers) {
-            if (remoteLine.getP1().equals(point) &&
-                    remoteLine.getP2().equals(point)) {
-                originPoint = point;
+        for (int i = 0; i < centers.length; i++) {
+            if (!remoteLine.getP1().equals(centers[i]) &&
+                    !remoteLine.getP2().equals(centers[i])) {
+                originPoint = centers[i];
                 break;
             }
         }
@@ -327,7 +331,7 @@ public class FinderPattern {
 
         int r = new Line(originPoint, remotePoint).getLength();
         //canvas.println(Integer.toString(((remotePoint.getX() - originPoint.getX()) << QRCodeImageReader.DECIMAL_POINT)));
-        int[] angle = new int[2];
+        int angle[] = new int[2];
         angle[0] = ((remotePoint.getY() - originPoint.getY()) << QRCodeImageReader.DECIMAL_POINT) / r; //Sin
         angle[1] = ((remotePoint.getX() - originPoint.getX()) << (QRCodeImageReader.DECIMAL_POINT)) / r; //Cos
 
@@ -342,8 +346,8 @@ public class FinderPattern {
             for (int j = i + 1; j < crossLines.length; j++) {
                 Line comparedLine = crossLines[j];
                 if (Line.isCross(compareLine, comparedLine)) {
-                    int x;
-                    int y;
+                    int x = 0;
+                    int y = 0;
                     if (compareLine.isHorizontal()) {
                         x = compareLine.getCenter().getX();
                         y = comparedLine.getCenter().getY();
@@ -398,8 +402,8 @@ public class FinderPattern {
 
         //last of centers is Left-Up patterns one
         for (int i = 0; i < centers.length; i++) {
-            if (centers[i].equals(sortedCenters[1]) &&
-                    centers[i].equals(sortedCenters[2])) {
+            if (!centers[i].equals(sortedCenters[1]) &&
+                    !centers[i].equals(sortedCenters[2])) {
                 sortedCenters[0] = centers[i];
             }
         }
@@ -412,11 +416,11 @@ public class FinderPattern {
         int cos = angle[1];
         if (sin >= 0 && cos > 0)
             return 1;
-        else if (sin > 0)
+        else if (sin > 0 && cos <= 0)
             return 2;
-        else if (cos < 0)
+        else if (sin <= 0 && cos < 0)
             return 3;
-        else if (sin < 0)
+        else if (sin < 0 && cos >= 0)
             return 4;
 
         return 0;
@@ -428,7 +432,7 @@ public class FinderPattern {
         int y = ((side1 == Point.BOTTOM || side2 == Point.BOTTOM) ? 0 : Integer.MAX_VALUE);
         sidePoint = new Point(x, y);
 
-        for (int i = points.length - 1; i >= 0; i--) {
+        for (int i = 0; i < points.length; i++) {
             switch (side1) {
                 case Point.RIGHT:
                     if (sidePoint.getX() < points[i].getX()) {
@@ -495,7 +499,7 @@ public class FinderPattern {
         return sidePoint;
     }
 
-    static int[] getWidth(boolean[][] image, Point[] centers)
+    static int[] getWidth(boolean[][] image, Point[] centers, int[] sincos)
             throws ArrayIndexOutOfBoundsException {
 
         int[] width = new int[3];
@@ -507,7 +511,7 @@ public class FinderPattern {
             for (lx = centers[i].getX(); lx >= 0; lx--) {
                 if (image[lx][y] == QRCodeImageReader.POINT_DARK &&
                         image[lx - 1][y] == QRCodeImageReader.POINT_LIGHT) {
-                    if (!flag) flag = true;
+                    if (flag == false) flag = true;
                     else break;
                 }
             }
@@ -515,7 +519,7 @@ public class FinderPattern {
             for (rx = centers[i].getX(); rx < image.length; rx++) {
                 if (image[rx][y] == QRCodeImageReader.POINT_DARK &&
                         image[rx + 1][y] == QRCodeImageReader.POINT_LIGHT) {
-                    if (!flag) flag = true;
+                    if (flag == false) flag = true;
                     else break;
                 }
             }
@@ -555,7 +559,7 @@ public class FinderPattern {
         }
         canvas.drawPoints(points, Color.RED);
 
-        int exactVersion;
+        int exactVersion = 0;
         try {
             exactVersion = checkVersionInfo(versionInformation);
         } catch (InvalidVersionInfoException e) {
@@ -572,7 +576,11 @@ public class FinderPattern {
             }
             canvas.drawPoints(points, Color.RED);
 
-            exactVersion = checkVersionInfo(versionInformation);
+            try {
+                exactVersion = checkVersionInfo(versionInformation);
+            } catch (VersionInformationException e2) {
+                throw e2;
+            }
         }
         return exactVersion;
     }

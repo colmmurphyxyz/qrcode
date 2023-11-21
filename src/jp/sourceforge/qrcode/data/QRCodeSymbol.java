@@ -89,7 +89,7 @@ public class QRCodeSymbol {
             alignmentPattern = new Point[logicalSeeds.length][logicalSeeds.length];
         }
 
-        //obtain alignment pattern's center coordintates by logical seeds
+        //obtain alignment pattern's center coordinates by logical seeds
         for (int col = 0; col < logicalSeeds.length; col++) { //列　
             for (int row = 0; row < logicalSeeds.length; row++) { //行
                 alignmentPattern[row][col] = new Point(logicalSeeds[row], logicalSeeds[col]);
@@ -234,11 +234,11 @@ public class QRCodeSymbol {
             numFormatAndVersionInfoModule = 67;
 
 
-        // the number of finter patterns :
+        // the number of fainter patterns :
         int sqrtCenters = (version / 7) + 2;
         // the number of modules left when we remove the patterns modules
         // 3*64 for the 3 big ones,
-        // sqrtCenters*sqrtCenters)-3)*25 for the small ones
+        // (sqrtCenters*sqrtCenters)-3)*25 for the small ones
         int modulesLeft = (version == 1 ? 192 : 192 + ((sqrtCenters * sqrtCenters) - 3) * 25);
         // Don't ask me how I found that one...
         //

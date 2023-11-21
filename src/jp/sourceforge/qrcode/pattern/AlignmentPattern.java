@@ -30,7 +30,7 @@ public class AlignmentPattern {
         Point[][] logicalCenters = getLogicalCenter(finderPattern);
         int logicalDistance = logicalCenters[1][0].getX() - logicalCenters[0][0].getX();
         //With it converts in order to handle in the same way
-        Point[][] centers;
+        Point[][] centers = null;
         centers = getCenter(image, finderPattern, logicalCenters);
         return new AlignmentPattern(centers, logicalDistance);
 
@@ -40,7 +40,7 @@ public class AlignmentPattern {
         return center;
     }
 
-    // for only transparency access in version 1, which has no alignment pattern
+    // for only trancparency access in version 1, which has no alignment pattern
     public void setCenter(Point[][] center) {
         this.center = center;
     }
@@ -77,15 +77,15 @@ public class AlignmentPattern {
 //					canvas.drawCross(centers[x][y], java.awt.Color.MAGENTA);
                     continue;
                 }
-                Point target;
+                Point target = null;
                 if (y == 0) {
-                    if (x < sqrtCenters - 1) {
+                    if (x > 0 && x < sqrtCenters - 1) {
                         target = axis.translate(centers[x - 1][y], logicalCenters[x][y].getX() - logicalCenters[x - 1][y].getX(), 0);
                         centers[x][y] = new Point(target.getX(), target.getY());
                         canvas.drawCross(centers[x][y], Color.RED);
                     }
                 } else if (x == 0) {
-                    if (y < sqrtCenters - 1) {
+                    if (y > 0 && y < sqrtCenters - 1) {
                         target = axis.translate(centers[x][y - 1], 0, logicalCenters[x][y].getY() - logicalCenters[x][y - 1].getY());
                         centers[x][y] = new Point(target.getX(), target.getY());
                         canvas.drawCross(centers[x][y], Color.RED);
@@ -279,8 +279,8 @@ public class AlignmentPattern {
     //get logical center coordinates of each alignment patterns
     public static Point[][] getLogicalCenter(FinderPattern finderPattern) {
         int version = finderPattern.getVersion();
-        Point[][] logicalCenters;
-        int[] logicalSeeds;
+        Point[][] logicalCenters = new Point[1][1];
+        int[] logicalSeeds = new int[1];
         //create "column(row)-coordinates" which based on relative coordinates
         //int sqrtCenters = (version / 7) + 2;
         //logicalSeeds = new int[sqrtCenters];
