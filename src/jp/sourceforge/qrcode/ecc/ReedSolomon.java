@@ -111,13 +111,15 @@ public class ReedSolomon {
         decode_data(y);
         correctionSucceeded = true;
         boolean hasError = false;
-        for (int i = 0; i < synBytes.length; i++) {
+        for (int synByte : synBytes) {
             //System.out.println("SyndromeS"+String.valueOf(i) + " = " + synBytes[i]);
-            if (synBytes[i] != 0)
+            if (synByte != 0) {
                 hasError = true;
+                break;
+            }
         }
         if (hasError)
-            correctionSucceeded = correct_errors_erasures(y, y.length, 0, new int[1]);
+            correctionSucceeded = correct_errors_erasures(y, y.length, new int[1]);
     }
 
     public boolean isCorrectionSucceeded() {
@@ -326,14 +328,13 @@ public class ReedSolomon {
 
     boolean correct_errors_erasures(int[] codeword,
                                     int csize,
-                                    int nerasures,
                                     int[] erasures) {
         int r, i, j, err;
 
 	  /* If you want to take advantage of erasure correction, be sure to
 	     set NErasures and ErasureLocs[] with the locations of erasures. 
 	     */
-        NErasures = nerasures;
+        NErasures = 0;
         for (i = 0; i < NErasures; i++) ErasureLocs[i] = erasures[i];
 
         Modified_Berlekamp_Massey();

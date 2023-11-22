@@ -9,10 +9,10 @@ import jp.sourceforge.qrcode.geom.*;
 import jp.sourceforge.qrcode.util.*;
 
 public class AlignmentPattern {
-    /*static final int RIGHT = 1;
+    static final int RIGHT = 1;
     static final int BOTTOM = 2;
     static final int LEFT = 3;
-    static final int TOP = 4;*/
+    static final int TOP = 4;
 
     static DebugCanvas canvas = QRCodeDecoder.getCanvas();
     Point[][] center;
@@ -41,13 +41,13 @@ public class AlignmentPattern {
     }
 
     // for only transparency access in version 1, which has no alignment pattern
-    /*public void setCenter(Point[][] center) {
+    public void setCenter(Point[][] center) {
         this.center = center;
-    }*/
+    }
 
-    /*public int getLogicalDistance() {
+    public int getLogicalDistance() {
         return patternDistance;
-    }*/
+    }
 
     static Point[][] getCenter(boolean[][] image, FinderPattern finderPattern, Point[][] logicalCenters)
             throws AlignmentPatternNotFoundException {
@@ -185,7 +185,7 @@ public class AlignmentPattern {
 		axis.setOrigin(finderPattern.getCenter(FinderPattern.DL));
 		centers[0][sqrtCenters - 1] = axis.translate(3, -3);
 		//centers[0][sqrtCenters - 1] = finderPattern.getCenter(FinderPattern.DL);
-        }
+
 		for (int y = 0; y < sqrtCenters; y++) {
 			for (int x = 0; x < sqrtCenters; x++) {
 				if (x == 1 && y == 0 && sqrtCenters == 3) { //型番7〜13の中央上の位置合せパターン
@@ -257,10 +257,10 @@ public class AlignmentPattern {
         y = uy = dy = targetPoint.getY();
 
         // GuoQing Hu's FIX
-        while (lx >= 1 && !targetPointOnTheCorner(image, lx, y, lx - 1, y)) lx--;
-        while (rx < image.length - 1 && !targetPointOnTheCorner(image, rx, y, rx + 1, y)) rx++;
-        while (uy >= 1 && !targetPointOnTheCorner(image, x, uy, x, uy - 1)) uy--;
-        while (dy < image[0].length - 1 && !targetPointOnTheCorner(image, x, dy, x, dy + 1)) dy++;
+        while (lx >= 1 && targetPointOnTheCorner(image, lx, y, lx - 1, y)) lx--;
+        while (rx < image.length - 1 && targetPointOnTheCorner(image, rx, y, rx + 1, y)) rx++;
+        while (uy >= 1 && targetPointOnTheCorner(image, x, uy, x, uy - 1)) uy--;
+        while (dy < image[0].length - 1 && targetPointOnTheCorner(image, x, dy, x, dy + 1)) dy++;
 
         return new Point((lx + rx + 1) / 2, (uy + dy + 1) / 2);
     }
@@ -271,8 +271,8 @@ public class AlignmentPattern {
             throw new AlignmentPatternNotFoundException("Alignment Pattern Finder exceeded image edge");
             //return true;
         } else {
-            return (image[x][y] == QRCodeImageReader.POINT_LIGHT &&
-                    image[nx][ny] == QRCodeImageReader.POINT_DARK);
+            return (image[x][y] != QRCodeImageReader.POINT_LIGHT ||
+                    image[nx][ny] != QRCodeImageReader.POINT_DARK);
         }
     }
 

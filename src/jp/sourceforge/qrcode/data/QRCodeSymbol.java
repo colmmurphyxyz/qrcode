@@ -152,8 +152,7 @@ public class QRCodeSymbol {
         //if (numError > 0)
         //	canvas.println(String.valueOf(numError) + " format errors corrected.");
         boolean[] formatInformation = new boolean[5];
-        for (int i = 0; i < 5; i++)
-            formatInformation[i] = output[10 + i];
+        System.arraycopy(output, 10, formatInformation, 0, 5);
 
         return formatInformation;
 
@@ -279,11 +278,11 @@ public class QRCodeSymbol {
 
     // for debug
     public String getMaskPatternRefererAsString() {
-        String maskPattern = Integer.toString(getMaskPatternReferer(), 2);
+        StringBuilder maskPattern = new StringBuilder(Integer.toString(getMaskPatternReferer(), 2));
         int length = maskPattern.length();
         for (int i = 0; i < 3 - length; i++)
-            maskPattern = "0" + maskPattern;
-        return maskPattern;
+            maskPattern.insert(0, "0");
+        return maskPattern.toString();
     }
 
     public int getWidth() {
@@ -371,7 +370,7 @@ public class QRCodeSymbol {
         int[] gotWords = new int[codeWords.size()];
         for (int i = 0; i < codeWords.size(); i++) {
             Integer temp = (Integer) codeWords.elementAt(i);
-            gotWords[i] = temp.intValue();
+            gotWords[i] = temp;
         }
         return gotWords;
     }

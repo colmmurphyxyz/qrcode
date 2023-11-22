@@ -11,7 +11,8 @@ import jp.sourceforge.qrcode.exception.DecodingFailedException;
 import jp.sourceforge.qrcode.exception.InvalidDataBlockException;
 import jp.sourceforge.qrcode.exception.SymbolNotFoundException;
 import jp.sourceforge.qrcode.geom.Point;
-//import jp.sourceforge.qrcode.ecc.ReedSolomon;
+
+
 import jp.sourceforge.qrcode.util.DebugCanvas;
 import jp.sourceforge.qrcode.util.DebugCanvasAdapter;
 import jp.sourceforge.qrcode.reader.QRCodeDataBlockReader;
@@ -19,22 +20,21 @@ import jp.sourceforge.qrcode.reader.QRCodeImageReader;
 import jp.sourceforge.qrcode.ecc.RsDecode;
 
 public class QRCodeDecoder {
-    int numTryDecode;
-    QRCodeSymbol qrCodeSymbol;
+    private QRCodeSymbol qrCodeSymbol;
     Vector<DecodeResult> results;
 //    Vector<DecodeResult> lastResults = new Vector<>();
-    static DebugCanvas canvas;
-    QRCodeImageReader imageReader;
-    int numLastCorrectionFailures;
-
+    private static DebugCanvas canvas;
+    private QRCodeImageReader imageReader;
+    private int numLastCorrectionFailures;
+    private int numTryDecode;
 
     /**
      * Class to encapsulate the result of a QR code decoding operation
      * provides information about the number of error corrections and the decoded bytes in the qr code
      */
-    class DecodeResult {
-        int numCorrectionFailures;
-        byte[] decodedBytes;
+    public class DecodeResult {
+        private final int numCorrectionFailures;
+        private final byte[] decodedBytes;
 
         public DecodeResult(byte[] decodedBytes, int numCorrectionFailures) {
             this.decodedBytes = decodedBytes;
@@ -77,7 +77,7 @@ public class QRCodeDecoder {
      * @param qrCodeImage qr code image to decode
      * @return byte[] decoded byte array, can be interpreted as a character sequence, URL, or a binary blob
      *      depending on the use case
-     * @throws DecodingFailedException
+     * @throws DecodingFailedException if decoding fails
      */
     public byte[] decode(QRCodeImage qrCodeImage) throws DecodingFailedException {
         Point[] adjusts = getAdjustPoints();
@@ -102,7 +102,7 @@ public class QRCodeDecoder {
         }
 
         // image unrecognizable, cannot decode
-        if (results.size() == 0) {
+        if (results.isEmpty()) {
             throw new DecodingFailedException("Give up decoding");
         }
 
