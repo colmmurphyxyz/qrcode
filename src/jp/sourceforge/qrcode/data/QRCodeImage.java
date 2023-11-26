@@ -11,3 +11,4 @@ public interface QRCodeImage {
 
     public int getPixel(int x, int y);
 }
+

@@ -10,8 +10,13 @@ import jp.sourceforge.qrcode.geom.Point;
 import jp.sourceforge.qrcode.reader.QRCodeDataBlockReader;
 import jp.sourceforge.qrcode.reader.QRCodeImageReader;
 import jp.sourceforge.qrcode.util.DebugCanvas;
+import jp.sourceforge.qrcode.util.DebugCanvasAdapter;
 
+import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.URL;
 import java.util.Vector;
 import java.util.spi.AbstractResourceBundleProvider;
 
@@ -25,13 +30,28 @@ public class Decoder {
     Vector<DecodeResult> results;
     int numLastCorrectionFailures;
 
+    static DebugCanvasAdapter canvas = new DebugCanvasAdapter(System.out);
+
+    public static DebugCanvas getDebugCanvas() {
+        return Decoder.canvas;
+    }
+
+    public PrintStream getDebugOutput() {
+        return Decoder.canvas.ps;
+    }
+
+    public static void setDebugOutput(PrintStream ps) {
+        Decoder.canvas.setDebugOutput(ps);
+    }
+
     public Decoder() {
         this.numDecodeAttempts = 0;
         this.results = new Vector<>();
     }
 
-    public static void setCanvas(DebugCanvas canvas) {
-        QRCodeDecoder.setCanvas(canvas);
+    public byte[] decodeImage(URL imageUrl) throws IOException {
+        BufferedImage image = ImageIO.read(imageUrl);
+        return decodeImage(new QRImage(image));
     }
 
     public byte[] decodeImage(QRCodeImage qrCodeImage) throws DecodingFailedException {

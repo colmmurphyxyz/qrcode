@@ -10,6 +10,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 public class DecoderExample {
     public static void main(String[] args) {
@@ -18,10 +19,14 @@ public class DecoderExample {
             System.err.println("e.g java -jar qrcode.jar qrcode.png");
         }
         Decoder decoder = new Decoder();
-        Decoder.setCanvas(new DefaultCanvas());
         for (String filename : args) {
             try {
-                BufferedImage image = ImageIO.read(new File(filename));
+                BufferedImage image;
+                if (filename.matches("https?://.*")) {
+                    image = ImageIO.read(new URL(filename));
+                } else {
+                    image = ImageIO.read(new File(filename));
+                }
                 byte[] result = decoder.decodeImage(new J2SEImage(image));
                 String decodedText = new String(result);
                 System.out.println(decodedText);
@@ -29,12 +34,6 @@ public class DecoderExample {
                 System.err.println("ERROR: Couldn't read " + filename);
             }
         }
-    }
-}
-
-class DefaultCanvas extends DebugCanvasAdapter {
-    public void println(String s) {
-        System.out.println(s);
     }
 }
 
