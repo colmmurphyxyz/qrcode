@@ -39,15 +39,13 @@ public class FinderPattern {
             VersionInformationException {
         Line[] lineAcross = findLineAcross(image);
         Line[] lineCross = findLineCross(lineAcross);
-        Point[] center = null;
-        try {
-            center = getCenter(lineCross);
-        } catch (FinderPatternNotFoundException e) {
-            throw e;
-        }
+        
+        Point[] center;
+        center = getCenter(lineCross);
+        
         int[] sincos = getAngle(center);
         center = sort(center, sincos);
-        int[] width = getWidth(image, center, sincos);
+        int[] width = getWidth(image, center);
         // moduleSize for version recognition
         int[] moduleSize = {(width[UL] << QRCodeImageReader.DECIMAL_POINT) / 7,
                 (width[UR] << QRCodeImageReader.DECIMAL_POINT) / 7,
@@ -203,21 +201,22 @@ public class FinderPattern {
     static boolean checkPattern(int[] buffer, int pointer) {
         final int[] modelRatio = {1, 1, 3, 1, 1};
 
-        int baselength = 0;
+        int baseLength = 0;
         for (int i = 0; i < 5; i++) {
-            baselength += buffer[i];
+            baseLength += buffer[i];
         }
         // pseudo fixed point calculation. I think it needs smarter code
-        baselength <<= QRCodeImageReader.DECIMAL_POINT;
-        baselength /= 7;
+        baseLength <<= QRCodeImageReader.DECIMAL_POINT;
+        baseLength /= 7;
         for (int i = 0; i < 5; i++) {
-            int leastlength = baselength * modelRatio[i] - baselength / 2;
-            int mostlength = baselength * modelRatio[i] + baselength / 2;
+            int leastLength = baseLength * modelRatio[i] - baseLength / 2;
+            int mostLength = baseLength * modelRatio[i] + baseLength / 2;
 
             //TODO rough finder pattern detection
+            
 
-            int targetlength = buffer[(pointer + i + 1) % 5] << QRCodeImageReader.DECIMAL_POINT;
-            if (targetlength < leastlength || targetlength > mostlength) {
+            int targetLength = buffer[(pointer + i + 1) % 5] << QRCodeImageReader.DECIMAL_POINT;
+            if (targetLength < leastLength || targetLength > mostLength) {
                 return false;
             }
         }
@@ -232,8 +231,7 @@ public class FinderPattern {
         Vector lineNeighbor = new Vector();
         Vector lineCandidate = new Vector();
         Line compareLine;
-        for (int i = 0; i < lineAcross.length; i++)
-            lineCandidate.addElement(lineAcross[i]);
+        for (Line across : lineAcross) lineCandidate.addElement(across);
 
         for (int i = 0; i < lineCandidate.size() - 1; i++) {
             lineNeighbor.removeAllElements();
@@ -255,7 +253,7 @@ public class FinderPattern {
                     compareLine = (Line) lineNeighbor.lastElement();
                     /*
                      * determine lines across Finder Patterns when number of neighbour lines are
-                     * bigger than 1/6 length of theirselves
+                     * bigger than 1/6 length of themselves
                      */
                     if (lineNeighbor.size() * 6 > compareLine.getLength()) {
                         crossLines.addElement(lineNeighbor.elementAt(lineNeighbor.size() / 2));
@@ -293,15 +291,15 @@ public class FinderPattern {
         // remoteLine - does not contain UL center
         Line remoteLine = Line.getLongest(additionalLine);
         Point originPoint = new Point();
-        for (int i = 0; i < centers.length; i++) {
-            if (remoteLine.getP1().equals(centers[i]) &&
-                    remoteLine.getP2().equals(centers[i])) {
-                originPoint = centers[i];
+        for (Point point : centers) {
+            if (remoteLine.getP1().equals(point) &&
+                    remoteLine.getP2().equals(point)) {
+                originPoint = point;
                 break;
             }
         }
         canvas.println("originPoint is: " + originPoint);
-        Point remotePoint = new Point();
+        Point remotePoint;
 
         //with origin that the center of Left-Up Finder Pattern, determine other two patterns center.
         //then calculate symbols angle
@@ -401,10 +399,10 @@ public class FinderPattern {
         }
 
         //last of centers is Left-Up patterns one
-        for (int i = 0; i < centers.length; i++) {
-            if (centers[i].equals(sortedCenters[1]) &&
-                    centers[i].equals(sortedCenters[2])) {
-                sortedCenters[0] = centers[i];
+        for (Point point : centers) {
+            if (point.equals(sortedCenters[1]) &&
+                    point.equals(sortedCenters[2])) {
+                sortedCenters[0] = point;
             }
         }
 
@@ -416,84 +414,64 @@ public class FinderPattern {
         int cos = angle[1];
         if (sin >= 0 && cos > 0)
             return 1;
-        else if (sin > 0 && cos <= 0)
+        else if (sin > 0)
             return 2;
-        else if (sin <= 0 && cos < 0)
+        else if (cos < 0)
             return 3;
-        else if (sin < 0 && cos >= 0)
+        else if (sin < 0)
             return 4;
 
         return 0;
     }
 
     static Point getPointAtSide(Point[] points, int side1, int side2) {
-        Point sidePoint = new Point();
+        new Point();
+        Point sidePoint;
         int x = ((side1 == Point.RIGHT || side2 == Point.RIGHT) ? 0 : Integer.MAX_VALUE);
         int y = ((side1 == Point.BOTTOM || side2 == Point.BOTTOM) ? 0 : Integer.MAX_VALUE);
         sidePoint = new Point(x, y);
 
-        for (int i = 0; i < points.length; i++) {
-            switch (side1) {
-                case Point.RIGHT:
-                    if (sidePoint.getX() < points[i].getX()) {
-                        sidePoint = points[i];
-                    } else if (sidePoint.getX() == points[i].getX()) {
-                        if (side2 == Point.BOTTOM) {
-                            if (sidePoint.getY() < points[i].getY()) {
-                                sidePoint = points[i];
-                            }
-                        } else {
-                            if (sidePoint.getY() > points[i].getY()) {
-                                sidePoint = points[i];
-                            }
-                        }
-                    }
-                    break;
-                case Point.BOTTOM:
-                    if (sidePoint.getY() < points[i].getY()) {
-                        sidePoint = points[i];
-                    } else if (sidePoint.getY() == points[i].getY()) {
-                        if (side2 == Point.RIGHT) {
-                            if (sidePoint.getX() < points[i].getX()) {
-                                sidePoint = points[i];
-                            }
-                        } else {
-                            if (sidePoint.getX() > points[i].getX()) {
-                                sidePoint = points[i];
-                            }
-                        }
-                    }
-                    break;
-                case Point.LEFT:
-                    if (sidePoint.getX() > points[i].getX()) {
-                        sidePoint = points[i];
-                    } else if (sidePoint.getX() == points[i].getX()) {
-                        if (side2 == Point.BOTTOM) {
-                            if (sidePoint.getY() < points[i].getY()) {
-                                sidePoint = points[i];
-                            }
-                        } else {
-                            if (sidePoint.getY() > points[i].getY()) {
-                                sidePoint = points[i];
-                            }
-                        }
-                    }
-                    break;
-                case Point.TOP:
-                    if (sidePoint.getY() > points[i].getY()) {
-                        sidePoint = points[i];
-                    } else if (sidePoint.getY() == points[i].getY()) {
-                        if (side2 == Point.RIGHT) {
-                            if (sidePoint.getX() < points[i].getX()) {
-                                sidePoint = points[i];
-                            }
-                        } else {
-                            if (sidePoint.getX() > points[i].getX()) {
-                                sidePoint = points[i];
-                            }
-                        }
-                    }
-                    break;
+        for (Point point : points) {
+            sidePoint = switch (side1) {
+                case Point.RIGHT -> getPoint(side2, sidePoint, point, sidePoint.getX() < point.getX());
+                case Point.BOTTOM -> getSidePoint(side2, sidePoint, point, sidePoint.getY() < point.getY());
+                case Point.LEFT -> getPoint(side2, sidePoint, point, sidePoint.getX() > point.getX());
+                case Point.TOP -> getSidePoint(side2, sidePoint, point, sidePoint.getY() > point.getY());
+                default -> sidePoint;
+            };
+        }
+        return sidePoint;
+    }
+
+    private static Point getSidePoint(int side2, Point sidePoint, Point point, boolean b) {
+        if (b) {
+            sidePoint = point;
+        } else if (sidePoint.getY() == point.getY()) {
+            if (side2 == Point.RIGHT) {
+                if (sidePoint.getX() < point.getX()) {
+                    sidePoint = point;
+                }
+            } else {
+                if (sidePoint.getX() > point.getX()) {
+                    sidePoint = point;
+                }
+            }
+        }
+        return sidePoint;
+    }
+
+    private static Point getPoint(int side2, Point sidePoint, Point point, boolean b) {
+        if (b) {
+            sidePoint = point;
+        } else if (sidePoint.getX() == point.getX()) {
+            if (side2 == Point.BOTTOM) {
+                if (sidePoint.getY() < point.getY()) {
+                    sidePoint = point;
+                }
+            } else {
+                if (sidePoint.getY() > point.getY()) {
+                    sidePoint = point;
+                }
             }
         }
         return sidePoint;
@@ -511,7 +489,7 @@ public class FinderPattern {
             for (lx = centers[i].getX(); lx >= 0; lx--) {
                 if (image[lx][y] == QRCodeImageReader.POINT_DARK &&
                         image[lx - 1][y] == QRCodeImageReader.POINT_LIGHT) {
-                    if (flag == false) flag = true;
+                    if (!flag) flag = true;
                     else break;
                 }
             }
@@ -519,7 +497,7 @@ public class FinderPattern {
             for (rx = centers[i].getX(); rx < image.length; rx++) {
                 if (image[rx][y] == QRCodeImageReader.POINT_DARK &&
                         image[rx + 1][y] == QRCodeImageReader.POINT_LIGHT) {
-                    if (flag == false) flag = true;
+                    if (!flag) flag = true;
                     else break;
                 }
             }
@@ -531,9 +509,9 @@ public class FinderPattern {
     static int calcRoughVersion(Point[] center, int[] width) {
         final int dp = QRCodeImageReader.DECIMAL_POINT;
         int lengthAdditionalLine = (new Line(center[UL], center[UR]).getLength()) << dp;
-        int avarageWidth = ((width[UL] + width[UR]) << dp) / 14;
-        int roughVersion = ((lengthAdditionalLine / avarageWidth) - 10) / 4;
-        if (((lengthAdditionalLine / avarageWidth) - 10) % 4 >= 2) {
+        int averageWidth = ((width[UL] + width[UR]) << dp) / 14;
+        int roughVersion = ((lengthAdditionalLine / averageWidth) - 10) / 4;
+        if (((lengthAdditionalLine / averageWidth) - 10) % 4 >= 2) {
             roughVersion++;
         }
 
@@ -559,7 +537,7 @@ public class FinderPattern {
         }
         canvas.drawPoints(points, Color.RED);
 
-        int exactVersion = 0;
+        int exactVersion;
         try {
             exactVersion = checkVersionInfo(versionInformation);
         } catch (InvalidVersionInfoException e) {
@@ -576,11 +554,7 @@ public class FinderPattern {
             }
             canvas.drawPoints(points, Color.RED);
 
-            try {
-                exactVersion = checkVersionInfo(versionInformation);
-            } catch (VersionInformationException e2) {
-                throw e2;
-            }
+            exactVersion = checkVersionInfo(versionInformation);
         }
         return exactVersion;
     }

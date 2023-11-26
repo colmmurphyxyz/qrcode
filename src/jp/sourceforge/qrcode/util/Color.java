@@ -15,7 +15,8 @@ public enum Color {
     LIGHTBLUE(0xBBBBFF),
     LIGHTGREEN(0xBBFFBB),
     RED(0xFF88888),
-    ORANGE(0xFFFF88);
+    ORANGE(0xFFFF88),
+    LIGHTRED(0xFFBBBB);
 
     private final int value;
 
