@@ -11,6 +11,8 @@ import java.io.PrintStream;
  */
 public interface DebugCanvas {
     public PrintStream ps = System.out;
+    public PrintStream getDebugOutput();
+    public void setDebugOutput(PrintStream ps);
     public void println(String string);
 
     public void drawPoint(Point point, int color);

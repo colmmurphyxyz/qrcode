@@ -1,10 +1,7 @@
 package example;
 
-import jp.sourceforge.qrcode.DecodeResult;
-import jp.sourceforge.qrcode.Decoder;
 import jp.sourceforge.qrcode.QRCodeDecoder;
-import jp.sourceforge.qrcode.data.QRCodeSymbol;
-import jp.sourceforge.qrcode.util.DebugCanvasAdapter;
+import jp.sourceforge.qrcode.QRImage;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -18,7 +15,8 @@ public class DecoderExample {
             System.err.println("please pass a QR Code image filepath as an argument");
             System.err.println("e.g java -jar qrcode.jar qrcode.png");
         }
-        Decoder decoder = new Decoder();
+        QRCodeDecoder decoder = new QRCodeDecoder();
+        QRCodeDecoder.setDebugOutput(System.err);
         for (String filename : args) {
             try {
                 BufferedImage image;
@@ -27,7 +25,7 @@ public class DecoderExample {
                 } else {
                     image = ImageIO.read(new File(filename));
                 }
-                byte[] result = decoder.decodeImage(new J2SEImage(image));
+                byte[] result = decoder.decodeImage(new QRImage(image));
                 String decodedText = new String(result);
                 System.out.println(decodedText);
             } catch (IOException e) {
