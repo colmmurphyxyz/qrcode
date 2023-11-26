@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 
 import jp.sourceforge.qrcode.util.DebugCanvas;
-import jp.sourceforge.qrcode.util.DebugCanvasAdapter;
 
 import java.net.URL;
 
@@ -62,10 +61,6 @@ public class QRCodeDecoderCUIExample {
             canvas.println("Error: " + e.getMessage() + " " + filename);
             System.out.println("Error: " + e.getMessage() + " " + filename);
             return false;
-        } catch (DecodingFailedException dfe) {
-            canvas.println("Error: " + dfe.getMessage());
-            System.out.println("Error: " + dfe.getMessage());
-            return false;
         } catch (Exception e) {
             canvas.println("Error: " + e.getMessage());
             System.out.println("Error: " + e.getMessage());
@@ -96,7 +91,7 @@ class J2SEImage implements QRCodeImage {
     }
 }
 
-class J2SECanvas extends DebugCanvasAdapter {
+class J2SECanvas implements DebugCanvas {
     public void println(String s) {
         //System.err.println(s);
     }

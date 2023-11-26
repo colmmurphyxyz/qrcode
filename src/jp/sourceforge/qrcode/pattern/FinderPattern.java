@@ -39,7 +39,7 @@ public class FinderPattern {
             VersionInformationException {
         Line[] lineAcross = findLineAcross(image);
         Line[] lineCross = findLineCross(lineAcross);
-        Point[] center;
+        Point[] center = null;
         try {
             center = getCenter(lineCross);
         } catch (FinderPatternNotFoundException e) {
@@ -73,9 +73,9 @@ public class FinderPattern {
         this.moduleSize = moduleSize;
     }
 
-    /*public Point[] getCenter() {
+    public Point[] getCenter() {
         return center;
-    }*/
+    }
 
     public Point getCenter(int position) {
         if (position >= UL && position <= DL)
@@ -84,9 +84,9 @@ public class FinderPattern {
             return null;
     }
 
-    /*public int getWidth(int position) {
+    public int getWidth(int position) {
         return width[position];
-    }*/
+    }
 
     public int[] getAngle() {
         return sincos;
@@ -100,13 +100,13 @@ public class FinderPattern {
         return moduleSize[UL];
     }
 
-    /*public int getModuleSize(int place) {
+    public int getModuleSize(int place) {
         return moduleSize[place];
-    }*/
+    }
 
-    /*public int getSqrtNumModules() {
+    public int getSqrtNumModules() {
         return 17 + 4 * version;
-    }*/
+    }
 
     /*
      * At first, to detect Finder Pattern, liner pattern (D:L:D:L:D)=(1:1:3:1:1)
@@ -255,7 +255,7 @@ public class FinderPattern {
                     compareLine = (Line) lineNeighbor.lastElement();
                     /*
                      * determine lines across Finder Patterns when number of neighbour lines are
-                     * bigger than 1/6 length of themselves
+                     * bigger than 1/6 length of theirselves
                      */
                     if (lineNeighbor.size() * 6 > compareLine.getLength()) {
                         crossLines.addElement(lineNeighbor.elementAt(lineNeighbor.size() / 2));
@@ -294,8 +294,8 @@ public class FinderPattern {
         Line remoteLine = Line.getLongest(additionalLine);
         Point originPoint = new Point();
         for (int i = 0; i < centers.length; i++) {
-            if (!remoteLine.getP1().equals(centers[i]) &&
-                    !remoteLine.getP2().equals(centers[i])) {
+            if (remoteLine.getP1().equals(centers[i]) &&
+                    remoteLine.getP2().equals(centers[i])) {
                 originPoint = centers[i];
                 break;
             }
@@ -346,8 +346,8 @@ public class FinderPattern {
             for (int j = i + 1; j < crossLines.length; j++) {
                 Line comparedLine = crossLines[j];
                 if (Line.isCross(compareLine, comparedLine)) {
-                    int x ;
-                    int y ;
+                    int x = 0;
+                    int y = 0;
                     if (compareLine.isHorizontal()) {
                         x = compareLine.getCenter().getX();
                         y = comparedLine.getCenter().getY();
@@ -402,8 +402,8 @@ public class FinderPattern {
 
         //last of centers is Left-Up patterns one
         for (int i = 0; i < centers.length; i++) {
-            if (!centers[i].equals(sortedCenters[1]) &&
-                    !centers[i].equals(sortedCenters[2])) {
+            if (centers[i].equals(sortedCenters[1]) &&
+                    centers[i].equals(sortedCenters[2])) {
                 sortedCenters[0] = centers[i];
             }
         }
@@ -416,11 +416,11 @@ public class FinderPattern {
         int cos = angle[1];
         if (sin >= 0 && cos > 0)
             return 1;
-        else if (sin > 0)
+        else if (sin > 0 && cos <= 0)
             return 2;
-        else if ( cos < 0)
+        else if (sin <= 0 && cos < 0)
             return 3;
-        else if (sin < 0)
+        else if (sin < 0 && cos >= 0)
             return 4;
 
         return 0;
@@ -511,7 +511,7 @@ public class FinderPattern {
             for (lx = centers[i].getX(); lx >= 0; lx--) {
                 if (image[lx][y] == QRCodeImageReader.POINT_DARK &&
                         image[lx - 1][y] == QRCodeImageReader.POINT_LIGHT) {
-                    if (!flag) flag = true;
+                    if (flag == false) flag = true;
                     else break;
                 }
             }
@@ -519,7 +519,7 @@ public class FinderPattern {
             for (rx = centers[i].getX(); rx < image.length; rx++) {
                 if (image[rx][y] == QRCodeImageReader.POINT_DARK &&
                         image[rx + 1][y] == QRCodeImageReader.POINT_LIGHT) {
-                    if (!flag) flag = true;
+                    if (flag == false) flag = true;
                     else break;
                 }
             }
@@ -531,9 +531,9 @@ public class FinderPattern {
     static int calcRoughVersion(Point[] center, int[] width) {
         final int dp = QRCodeImageReader.DECIMAL_POINT;
         int lengthAdditionalLine = (new Line(center[UL], center[UR]).getLength()) << dp;
-        int averageWidth = ((width[UL] + width[UR]) << dp) / 14;
-        int roughVersion = ((lengthAdditionalLine / averageWidth) - 10) / 4;
-        if (((lengthAdditionalLine / averageWidth) - 10) % 4 >= 2) {
+        int avarageWidth = ((width[UL] + width[UR]) << dp) / 14;
+        int roughVersion = ((lengthAdditionalLine / avarageWidth) - 10) / 4;
+        if (((lengthAdditionalLine / avarageWidth) - 10) % 4 >= 2) {
             roughVersion++;
         }
 
@@ -559,7 +559,7 @@ public class FinderPattern {
         }
         canvas.drawPoints(points, Color.RED);
 
-        int exactVersion;
+        int exactVersion = 0;
         try {
             exactVersion = checkVersionInfo(versionInformation);
         } catch (InvalidVersionInfoException e) {
