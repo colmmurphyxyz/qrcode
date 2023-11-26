@@ -3,25 +3,30 @@ package jp.sourceforge.qrcode.util;
 import jp.sourceforge.qrcode.geom.Line;
 import jp.sourceforge.qrcode.geom.Point;
 
+import java.io.PrintStream;
+
 /*
- * This class must be an "edition independent" class for debug information controls.
+ * This class must be an "edition independent" class for debug information controll.
  * I think it's good idea to modify this class with a adapter pattern
  */
 public interface DebugCanvas {
-    void println(String string);
+    public PrintStream ps = System.out;
+    public PrintStream getDebugOutput();
+    public void setDebugOutput(PrintStream ps);
+    public void println(String string);
 
-    void drawPoint(Point point, Color color);
+    public void drawPoint(Point point, int color);
 
-    void drawCross(Point point, Color color);
+    public void drawCross(Point point, int color);
 
-    void drawPoints(Point[] points, Color color);
+    public void drawPoints(Point[] points, int color);
 
-    void drawLine(Line line, Color color);
+    public void drawLine(Line line, int color);
 
-    void drawLines(Line[] lines, Color color);
+    public void drawLines(Line[] lines, int color);
 
-    void drawPolygon(Point[] points, Color color);
+    public void drawPolygon(Point[] points, int color);
 
-    void drawMatrix(boolean[][] matrix);
+    public void drawMatrix(boolean[][] matrix);
 }
 
