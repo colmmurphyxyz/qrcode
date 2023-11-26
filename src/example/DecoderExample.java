@@ -3,6 +3,7 @@ package example;
 import jp.sourceforge.qrcode.DecodeResult;
 import jp.sourceforge.qrcode.Decoder;
 import jp.sourceforge.qrcode.QRCodeDecoder;
+import jp.sourceforge.qrcode.QRImage;
 import jp.sourceforge.qrcode.data.QRCodeSymbol;
 import jp.sourceforge.qrcode.util.DebugCanvasAdapter;
 
@@ -27,7 +28,7 @@ public class DecoderExample {
                 } else {
                     image = ImageIO.read(new File(filename));
                 }
-                byte[] result = decoder.decodeImage(new J2SEImage(image));
+                byte[] result = decoder.decodeImage(new QRImage(image));
                 String decodedText = new String(result);
                 System.out.println(decodedText);
             } catch (IOException e) {

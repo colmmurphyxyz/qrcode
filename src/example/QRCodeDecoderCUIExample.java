@@ -1,4 +1,5 @@
 package example;
+/*
 
 import jp.sourceforge.qrcode.QRCodeDecoder;
 import jp.sourceforge.qrcode.util.ContentConverter;
@@ -100,3 +101,4 @@ class J2SECanvas extends DebugCanvasAdapter {
         //System.err.println(s);
     }
 }
+*/
